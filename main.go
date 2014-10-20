@@ -2,7 +2,7 @@
 
 package main
 
-import "signatures"
+import "github.com/kbingman/signatures/signatures"
 
 /*
 Create a new MongoDB session, using a database
