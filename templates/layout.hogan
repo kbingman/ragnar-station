@@ -1,0 +1,18 @@
+<html>
+  <head>
+    <title>Shipyards</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <!-- <link href="http://fonts.googleapis.com/css?family=Fira+Sans:300,400,500"
+          rel="stylesheet"
+          type="text/css"> -->
+    <link rel="stylesheet" href="/css/main.css">
+  </head>
+  <body>
+    {{{content}}}
+  </body>
+  <!--script src='/js/lib/jquery.min.js'></script-->
+  <script src='/js/bundle.js'></script>
+</html>
