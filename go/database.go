@@ -3,7 +3,6 @@
 package signatures
 
 import (
-  "github.com/go-martini/martini"
   "labix.org/v2/mgo"
 )
 
@@ -25,7 +24,7 @@ func NewSession(name string) *DatabaseSession {
     panic(err)
   }
 
-  addIndexToSignatureEmails(session.DB(name))
+  addIndexToStarships(session.DB(name))
   return &DatabaseSession{session, name}
 }
 
@@ -36,32 +35,14 @@ since they can still enter
 "dudebro+signature2@exmaple.com". But if they're
 that clever, I say they deserve the extra signature.
 */
-func addIndexToSignatureEmails(db *mgo.Database) {
+func addIndexToStarships(db *mgo.Database) {
   index := mgo.Index{
-    Key:      []string{"email"},
+    Key:      []string{"name"},
     Unique:   true,
     DropDups: true,
   }
-  indexErr := db.C("signatures").EnsureIndex(index)
+  indexErr := db.C("starships").EnsureIndex(index)
   if indexErr != nil {
     panic(indexErr)
-  }
-}
-
-/*
-Martini lets you inject parameters for routing handlers
-by using `context.Map()`. I'll pass each route handler
-a instance of an *mgo.Database, so they can
-get and insert signatures.
-
-For more information, check out:
-http://blog.gopheracademy.com/day-11-martini
-*/
-func (session *DatabaseSession) Database() martini.Handler {
-  return func(context martini.Context) {
-    s := session.Clone()
-    context.Map(s.DB(session.databaseName))
-    defer s.Close()
-    context.Next()
   }
 }

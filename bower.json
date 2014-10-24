@@ -1,0 +1,21 @@
+{
+  "name": "shipbuilder",
+  "version": "0.0.0",
+  "homepage": "https://github.com/kbingman/ragnar-station",
+  "authors": [
+    "Keith Bingman"
+  ],
+  "description": "temp",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "flight-with-state": "~1.2.1"
+  }
+}
