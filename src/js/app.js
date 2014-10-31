@@ -1,6 +1,10 @@
 var $ = require('jquery');
 var flight = require('./lib/flight');
-var Flux = require('delorean.js').Flux;
+
+var shipXHR = require('./data_component/ship_xhr');
+var shipResponder = require('./data_component/ship_responder');
+var shipUI = require('./ui_component/ship_ui');
+var createShipUI = require('./ui_component/create_ship_ui');
 
 /**
  * Loads Flight components
@@ -9,6 +13,7 @@ var Flux = require('delorean.js').Flux;
 /**
  * Expose Globals
  */
+// Flux.define('EventEmitter', $);
 window.$ = $;
 
 flight.debug.enable(true);
@@ -20,101 +25,7 @@ DEBUG.events.logAll();
  */
 // defaultPage.init();
 
-console.log('starting');
-
-// Store
-var IncrementStore = Flux.createStore({
-
-  actions: {
-    'increase': 'increaseTotal',
-    'decrease': 'decreaseTotal',
-    'reset': 'resetTotal'
-  },
-
-  total: 0,
-  increaseTotal: function() {
-    this.total++;
-    this.emit('change');
-  },
-  decreaseTotal: function() {
-    this.total--;
-    this.emit('change');
-  },
-  resetTotal: function() {
-    this.total = 100;
-    this.emit('change');
-  }
-});
-
-
-// var incrementStore = ;
-
-// Dispatcher
-var IncrementDispatcher = Flux.createDispatcher({
-  increase: function () {
-    this.dispatch('increase');
-  },
-  decrease: function () {
-    this.dispatch('decrease');
-  },
-  reset: function () {
-    this.dispatch('reset');
-  },
-  getStores: function () {
-    return {
-      increment: new IncrementStore()
-    };
-  }
-});
-
-// Action Generator
-var IncrementActions = {
-  increase: function () {
-    IncrementDispatcher.increase();
-  },
-  decrease: function () {
-    IncrementDispatcher.decrease();
-  },
-  reset: function () {
-    IncrementDispatcher.reset();
-  }
-};
-
-// Component
-
-var IncrementView = flight.component(function () {
-
-  this.attributes({
-    'totalDisplay': 'span'
-  });
-
-  this.render = function () {
-    var total = IncrementDispatcher.getStore('increment').total;
-    this.select('totalDisplay')[0].innerHTML = total;
-  };
-
-  this.after('initialize', function () {
-      IncrementDispatcher.on('change:all', this.render.bind(this));
-  });
-});
-
-var IncrementButtonView = flight.component(function () {
-  this.attributes({
-    'decreaseButton': '#decrease',
-    'increaseButton': '#increase',
-    'resetButton': '#reset'
-  });
-
-  this.after('initialize', function () {
-
-    this.on('click', {
-      'increaseButton': IncrementActions.increase,
-      'decreaseButton': IncrementActions.decrease,
-      'resetButton': IncrementActions.reset
-    });
-  });
-});
-
-
-IncrementView.attachTo('#total');
-IncrementButtonView.attachTo('#buttons');
+shipResponder.attachTo(document);
+shipXHR.attachTo(document);
+shipUI.attachTo('#starships');
+createShipUI.attachTo('#buttons');

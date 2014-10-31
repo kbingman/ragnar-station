@@ -1,15 +1,11 @@
 <h1>{{ greeting }}</h1>
-{{# starships }}
-<div>
-  {{ name }}
-</div>
-{{/ starships }}
 
-<div>
-  <div id="total">Total: <span>0</span></div>
-  <div id="buttons">
-    <button id="increase">Increase</button>
-    <button id="decrease">Decrease</button>
-    <button id="reset">Reset</button>
-  </div>
+<div id="starships">
+</div>
+
+<div id="buttons">
+  <form id="createStarship">
+    <input type="text" name="name" id="starshipName" />
+    <button id="createShipButton">Create</button>
+  </form>
 </div>

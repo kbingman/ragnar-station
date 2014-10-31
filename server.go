@@ -106,7 +106,7 @@ func deleteStarship(w http.ResponseWriter, r *http.Request, params httprouter.Pa
 
     // Remove it from database
     err = collection.Remove(bson.M{"_id":bson.ObjectIdHex(id)})
-    if err != nil { log.Printf("Could not find kitten %s to delete", id)}
+    if err != nil { log.Printf("Could not find starship %s to delete", id)}
     w.WriteHeader(http.StatusNoContent)
 }
 
