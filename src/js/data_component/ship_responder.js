@@ -16,10 +16,15 @@ module.exports = flight.component(function() {
     ShipDispatcher.delete(data.starship);
   };
 
+  this.logger = function(e, data) {
+    console.log('data', data)
+  }
+
   this.after('initialize', function() {
     this.on(document, 'displayShipInfo', this.displayShipInfo);
     this.on(document, 'addNewShipData', this.addShipData);
     this.on(document, 'removeShipData', this.removeShipData);
+    this.on(document, 'successfullyUpdatedShipData', this.logger)
   });
 
 });

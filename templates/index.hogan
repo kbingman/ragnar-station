@@ -1,11 +1,11 @@
-<h1>{{ greeting }}</h1>
-
-<div id="starships">
-</div>
+<h1>{{ title }}</h1>
 
 <div id="buttons">
-  <form id="createStarship">
-    <input type="text" name="name" id="starshipName" />
-    <button id="createShipButton">Create</button>
-  </form>
+  {{> ships/_form.hogan }}
+</div>
+
+<a data-new="ship" href="/ships/new">New Ship</a>
+
+<div id="starships">
+  {{> ships/_ship.hogan }}
 </div>

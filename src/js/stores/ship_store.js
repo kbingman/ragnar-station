@@ -19,6 +19,10 @@ module.exports = Flux.createStore({
     this.emit('change');
   },
 
+  updateShip: function(data) {
+    alert(data);
+  },
+
   removeShip: function(data) {
     var ship = this.ships.filter(function(s) {
       return s.id == data.id;

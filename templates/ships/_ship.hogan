@@ -1,6 +1,9 @@
 {{# starships }}
-<div id="ship-{{ id }}">
-  {{ name }}
-  <a class="r-delete r-action" data-delete={{ id }}>X</a>
-</div>
+  <div id="ship-{{ id }}">
+    <a href="/ships/{{ id }}" class="r-action" data-show="{{ id }}">
+      {{ name }}
+    </a>
+    {{ mass }}m {{ configuration }}
+    <a class="r-delete r-action" data-delete="{{ id }}">X</a>
+  </div>
 {{/ starships }}

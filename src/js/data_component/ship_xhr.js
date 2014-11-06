@@ -35,6 +35,22 @@ var shipXHR = function() {
     });
   };
 
+  this.updateShip = function(e, data) {
+    this.request({
+      'xhr': {
+        'path': 'ships/' + data.id,
+        'method': 'put',
+        'data': {
+          'starship': data
+        }
+      },
+      'events': {
+        'done': 'successfullyUpdatedShipData',
+        'fail': 'ajaxError'
+      }
+    });
+  }
+
   this.deleteShip = function(e, data) {
     this.request({
       'xhr': {
@@ -51,6 +67,7 @@ var shipXHR = function() {
   this.after('initialize', function() {
     this.on(document, 'getShips', this.getAllShips);
     this.on(document, 'createShip', this.createShip);
+    this.on(document, 'updateShip', this.updateShip);
     this.on(document, 'deleteShip', this.deleteShip);
   });
 

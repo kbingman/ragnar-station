@@ -13,7 +13,6 @@ var createShipUI = require('./ui_component/create_ship_ui');
 /**
  * Expose Globals
  */
-// Flux.define('EventEmitter', $);
 window.$ = $;
 
 flight.debug.enable(true);

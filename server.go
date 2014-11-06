@@ -4,6 +4,8 @@ import (
   "net/http"
   "fmt"
   "log"
+  "path"
+  "os"
   "encoding/json"
   "github.com/codegangsta/negroni"
   "github.com/julienschmidt/httprouter"
@@ -13,21 +15,42 @@ import (
 )
 
 var (
-    session *mgo.Session
-    collection *mgo.Collection
+  session *mgo.Session
+  collection *mgo.Collection
 )
 
+type Weapon struct {
+  Id int64
+  Name string
+  // CostFactor int64
+  // RequiredTechLevel int64
+}
+
+type Configuration struct {
+  Id int64
+  Name string
+  // CostFactor int64
+}
+
 type Starship struct {
-    Id bson.ObjectId `bson:"_id" json:"id"`
-    Name string `json:"name"`
+  Id bson.ObjectId `bson:"_id" string:"id" json:"id"`
+  Name string `string:"name" json:"name"`
+  Configuration string `json:"configuration"`
+  Mass int64 `json:"mass"`
+  Thrust int64 `json:"thrust"`
+  Ftl int64 `json:"ftl"`
+  PrimaryWeapon Weapon `json:"primaryWeapon"`
+  PointDefenseWeapons []Weapon `json:"pointDefenseWeapons"`
+  BatteryWeapons []Weapon `json:"batteryWeapons"`
+  SmallCraft []Starship `json:"smallCraft"`
 }
 
 type StarshipJSON struct {
-    Starship Starship `json:"starship"`
+  Starship Starship `json:"starship"`
 }
 
 type StarshipsJSON struct {
-    Starships []Starship `json:"starships"`
+  Starships []Starship `json:"starships"`
 }
 
 func createStarship(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
@@ -51,10 +74,10 @@ func createStarship(w http.ResponseWriter, req *http.Request, _ httprouter.Param
         log.Printf("Inserted new starship %s with name %s", starship.Id, starship.Name)
     }
 
-    j, err := json.Marshal(StarshipJSON{Starship: starship})
+    json, err := json.Marshal(StarshipJSON{Starship: starship})
     if err != nil { panic(err) }
     w.Header().Set("Content-Type", "application/json")
-    w.Write(j)
+    w.Write(json)
 }
 
 func getAllStarships(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
@@ -69,65 +92,136 @@ func getAllStarships(res http.ResponseWriter, req *http.Request, _ httprouter.Pa
     }
 
     res.Header().Set("Content-Type", "application/json")
-    j, err := json.Marshal(StarshipsJSON{Starships: starships})
+    json, err := json.Marshal(StarshipsJSON{Starships: starships})
     if err != nil { panic (err) }
-    res.Write(j)
+    res.Write(json)
     log.Println("Provided json")
 
 }
 
 func updateStarship(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-    var err error
-    // Grab the starship's id from the incoming url
-    id := bson.ObjectIdHex(params.ByName("id"))
+  var err error
+  // Grab the starship's id from the incoming url
+  id := bson.ObjectIdHex(params.ByName("id"))
 
-    // Decode the incoming starship json
-    var starshipJSON StarshipJSON
-    err = json.NewDecoder(r.Body).Decode(&starshipJSON)
-    if err != nil {panic(err)}
+  // Decode the incoming starship json
+  var starshipJSON StarshipJSON
+  err = json.NewDecoder(r.Body).Decode(&starshipJSON)
+  if err != nil {panic(err)}
 
-    // Update the database
-    err = collection.Update(bson.M{"_id":id},
-             bson.M{"name":starshipJSON.Starship.Name,
-                    "_id": id,
-                    })
-    if err == nil {
-        log.Printf("Updated starship %s name to %s", id, starshipJSON.Starship.Name)
-    } else {
-      panic(err)
-    }
-    w.WriteHeader(http.StatusNoContent)
+  // Update the database
+  err = collection.Update(bson.M{"_id":id},
+    bson.M{
+        "name": starshipJSON.Starship.Name,
+        "mass": starshipJSON.Starship.Mass,
+        "_id": id,
+    })
+  if err == nil {
+    log.Printf("Updated starship %s name to %s", id, starshipJSON.Starship.Name)
+  } else {
+    panic(err)
+  }
+  w.WriteHeader(http.StatusNoContent)
 }
 
 func deleteStarship(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-    // Grab the starship's id from the incoming url
-    var err error
-    id := params.ByName("id")
+  // Grab the starship's id from the incoming url
+  var err error
+  id := params.ByName("id")
 
-    // Remove it from database
-    err = collection.Remove(bson.M{"_id":bson.ObjectIdHex(id)})
-    if err != nil { log.Printf("Could not find starship %s to delete", id)}
-    w.WriteHeader(http.StatusNoContent)
+  // Remove it from database
+  err = collection.Remove(bson.M{"_id":bson.ObjectIdHex(id)})
+  if err != nil { log.Printf("Could not find starship %s to delete", id)}
+  w.WriteHeader(http.StatusNoContent)
 }
 
-func renderHTML(template string, context map[string]string) string {
+func renderHTML(template string, context map[string]interface{}) string {
   layoutPath := "templates/layout.hogan"
-  templatePath := "templates/" + template + ".hogan"
-  return mustache.RenderFileInLayout(templatePath, layoutPath, context)
+  filename := path.Join(path.Join(os.Getenv("PWD"), "templates"), template + ".hogan")
+  return mustache.RenderFileInLayout(filename, layoutPath, context)
 }
 
 func renderIndex(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
   w.Header().Set("Content-Type", "text/html")
-  context := map[string]string{
-    "greeting":"Ragnar Station",
+
+  starships := []Starship{}
+  iter := collection.Find(nil).Iter()
+  result := Starship{}
+
+  for iter.Next(&result) {
+    starships = append(starships, result)
+  }
+
+  context := map[string]interface{}{
+    "title": "Ragnar Station",
+    "starships": starships,
   }
 
   fmt.Fprint(w, renderHTML("index", context))
 }
 
+func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+
+  id := params.ByName("id")
+  iter := collection.Find(nil).Iter()
+  starship := Starship{}
+  starships := []Starship{}
+  result := Starship{}
+
+  for iter.Next(&result) {
+    if result.Id.Hex() == id {
+      starship = result
+    }
+    starships = append(starships, result)
+  }
+
+  configurations := []*Configuration{
+    {1, "Needle"},
+    {2, "Wedge"},
+    {3, "Sphere"},
+    {4, "Wheel"},
+    {6, "Skeletal"},
+    {5, "Planetoid"},
+  }
+
+  primaryWeapons := []*Weapon{
+    {1, "MissleTubes"},
+    {2, "CaptialRailgun"},
+    {3, "MassDriver"},
+    {4, "ParticleAccerator"},
+    {5, "AntiMatterDriver"},
+  }
+
+  pointDefenseWeapons := []*Weapon{
+    {1, "MissleLauncher"},
+    {2, "BeamLaser"},
+    {3, "Railgun"},
+    {4, "GaussGun"},
+  }
+
+  context := map[string]interface{}{
+    "title": "Ragnar Station",
+    "configurations": configurations,
+    "starships": starships,
+    "starship": starship,
+
+    "primaryWeapons": primaryWeapons,
+    "pointDefenseWeapons": pointDefenseWeapons,
+  }
+
+  w.Header().Set("Content-Type", "text/html")
+  fmt.Fprint(w, renderHTML("index", context))
+}
+
+
 func main() {
   router := httprouter.New()
+
+  // HTML Routes
   router.GET("/", renderIndex)
+  router.GET("/ships/:id", renderShip)
+
+  // JSON API routes
   router.GET("/api/ships", getAllStarships)
   router.POST("/api/ships", createStarship)
   router.DELETE("/api/ships/:id", deleteStarship)

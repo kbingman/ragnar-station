@@ -1,6 +1,4 @@
-module.exports = withAjax;
-
-function withAjax() {
+module.exports = function withAjax() {
 
   this.attributes({
     baseUrl: null,
@@ -17,6 +15,7 @@ function withAjax() {
     xhr.upload.addEventListener('progress', progressHandler.bind(this), false);
 
     xhr.open(method, this.attr.baseUrl + url, true);
+    console.log(data)
     xhr.send(data);
 
     function readystatechangeHandler(response) {

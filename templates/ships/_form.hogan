@@ -1,0 +1,97 @@
+{{# starship }}
+  <form id="createStarship">
+    <!-- <input name="id" value="{{ id }}" type="hidden" /> -->
+    <div class="r-field">
+      <label for="shipName">Name</label>
+      <input type="text" name="name" id="shipName" value="{{ Name }}" placeholder="Name" />
+      <span class="r-error-message"></span>
+    </div>
+
+    <div class="r-field">
+      <label for="shipMass">Mass</label>
+      <input type="text" name="mass" id="shipMass" value="{{ Mass }}" placeholder="Mass" />
+      <span class="r-error-message"></span>
+    </div>
+
+    <div class="r-field">
+      <label for="shipConfiguration">Configuration</label>
+      <select name="configuration" id="shipConfiguration">
+        {{# configurations }}
+          <option value="{{ Name }}">{{ Name }}</option>
+        {{/ configurations }}
+      </select>
+      <span class="r-error-message"></span>
+    </div>
+
+    <div class="r-field">
+      <label for="primaryWeapon">Thrust</label>
+      <span name="thrust" data-thrust>{{ Thrust }}</span>
+      <button data="">&#8593;</button>
+      <button data="">&#8595;</button>
+      <span class="r-error-message"></span>
+    </div>
+
+    <div class="r-field">
+      <label for="primaryWeapon">FTL Range</label>
+      <span name="ftl" data-ftl>{{ Ftl }}</span>
+      <button data="">&#8593;</button>
+      <button data="">&#8595;</button>
+      <span class="r-error-message"></span>
+    </div>
+
+    <div class="r-field">
+      <label for="reactor">Reactor</label>
+      <span name="reactor" data-reactor>{{ reactor }}</span>
+      <button data="">&#8593;</button>
+      <button data="">&#8595;</button>
+      <span class="r-error-message"></span>
+    </div>
+
+    <div class="r-field">
+      <label for="primaryWeapon">Spinal Mounted Primary Weapon</label>
+      <select id="primaryWeapon">
+        <option value="">...</option>
+        {{# primaryWeapons }}
+          <option value="{{ Name }}">{{ Name }}</option>
+        {{/ primaryWeapons }}
+      </select>
+      <span class="r-error-message"></span>
+    </div>
+
+    <div class="r-field">
+      <label for="batteryWeapons">Battery Weapons</label>
+      <select id="batteryWeapons">
+        <option value="">...</option>
+        {{# pointDefenseWeapons }}
+          <option value="{{ Name }}">{{ Name }}</option>
+        {{/ pointDefenseWeapons }}
+      </select>
+      <button id="addBattterButton">Add</button>
+      <span class="r-error-message"></span>
+    </div>
+
+    <div class="r-field">
+      <label for="pointDefenseWeapons">Point Defense Weapons</label>
+      <select id="pointDefenseWeapons">
+        <option value="">...</option>
+        {{# pointDefenseWeapons }}
+          <option value="{{ Name }}">{{ Name }}</option>
+        {{/ pointDefenseWeapons }}
+      </select>
+      <button id="addPointDefenseButton">Add</button>
+      <span class="r-error-message"></span>
+    </div>
+
+    <div class="r-field">
+      <label for="smallcraft">Small Craft</label>
+      <select id="smallcraft">
+        <option value="">...</option>
+        {{# smallcraft }}
+          <option value="{{ . }}">{{ . }}</option>
+        {{/ smallcraft }}
+      </select>
+      <button data="">Add</button>
+      <span class="r-error-message"></span>
+    </div>
+  </form>
+{{/ starship }}
