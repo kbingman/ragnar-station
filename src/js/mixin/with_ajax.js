@@ -1,3 +1,5 @@
+var promise = require('es6-promise');
+
 module.exports = function withAjax() {
 
   this.attributes({
@@ -15,12 +17,10 @@ module.exports = function withAjax() {
     xhr.upload.addEventListener('progress', progressHandler.bind(this), false);
 
     xhr.open(method, this.attr.baseUrl + url, true);
-    console.log(data)
     xhr.send(data);
 
     function readystatechangeHandler(response) {
       if (xhr.readyState == 4 && xhr.status == 200) {
-        console.log(xhr.response);
         triggerEvent.call(this, 'done');
       }
       else if (xhr.readyState == 4 && xhr.status != 200) {

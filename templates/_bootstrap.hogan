@@ -1,0 +1,22 @@
+var bootstrap = {
+  configurations: [
+    {{# configurations }}{{> ships/_attributes.hogan }}{{/ configurations }}
+  ],
+  primaryWeapons: [
+    {{# primaryWeapons }}{{> ships/_attributes.hogan }}{{/ primaryWeapons }}
+  ],
+  pointDefenseWeapons: [
+    {{# pointDefenseWeapons }}{{> ships/_attributes.hogan }}{{/ pointDefenseWeapons }}
+  ],
+  smallcraft: [
+    {{# smallcraft }}{{> ships/_attributes.hogan }}{{/ smallcraft }}
+  ],
+  starships: [
+    {{# starships }}
+      { id: "{{ id }}", name: "{{ name }}", mass: "{{ mass }}", configuration: "{{ configuration }}" },
+    {{/ starships }}
+  ],
+  {{# starship }}
+  starship: { id: "{{ id }}", name: "{{ name }}" , mass: "{{ mass }}" }
+  {{/ starship }}
+}

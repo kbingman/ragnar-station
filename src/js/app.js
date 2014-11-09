@@ -1,8 +1,7 @@
 var $ = require('jquery');
 var flight = require('./lib/flight');
 
-var shipXHR = require('./data_component/ship_xhr');
-var shipResponder = require('./data_component/ship_responder');
+var shipActions = require('./data_component/ship_actions');
 var shipUI = require('./ui_component/ship_ui');
 var createShipUI = require('./ui_component/create_ship_ui');
 
@@ -24,7 +23,6 @@ DEBUG.events.logAll();
  */
 // defaultPage.init();
 
-shipResponder.attachTo(document);
-shipXHR.attachTo(document);
+shipActions.attachTo(document);
 shipUI.attachTo('#starships');
 createShipUI.attachTo('#buttons');

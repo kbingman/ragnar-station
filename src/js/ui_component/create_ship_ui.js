@@ -1,5 +1,7 @@
 var flight = require('../lib/flight');
 var withFormUtils = require('../mixin/with_form_utils');
+var template = require('../../../templates/ships/_form.hogan');
+var ShipDispatcher = require('../dispatcher');
 
 module.exports = flight.component(withFormUtils, function() {
   this.attributes({
@@ -34,32 +36,55 @@ module.exports = flight.component(withFormUtils, function() {
   };
 
   // Should this be in the Store, or is it part of the UI?
-  this.checkAttributes = function(attributes) {
-    var errors = [];
+  // this.checkAttributes = function(attributes) {
+  //   var errors = [];
+  //
+  //   switch (true) {
+  //     case attributes.name == '':
+  //       errors.push({ 'name': 'required' });
+  //     case isNaN(attributes.mass) || attributes.mass == 0:
+  //       errors.push({ 'mass': 'required' });
+  //   }
+  //
+  //   return errors;
+  // }
 
-    switch (true) {
-      case attributes.name == '':
-        errors.push({ 'name': 'required' });
-      case isNaN(attributes.mass) || attributes.mass == 0:
-        errors.push({ 'mass': 'required' });
+  // this.showErrors = function(errors) {
+  //   errors.forEach(function(error) {
+  //     var key = Object.keys(error)[0];
+  //     var field = this.node.querySelector('[name="' + key + '"]');
+  //     var parent = field ? field.parentElement : null;
+  //     var messageField = parent ? parent.querySelector('.r-error-message') : null;
+  //
+  //     if (parent) {
+  //       parent.classList.add('r-error');
+  //       messageField.innerHTML = error[key];
+  //     }
+  //   }, this);
+  // }
+
+  this.displayShip = function(e) {
+    var starship = ShipDispatcher.getStore('ship').currentShip;
+    var currentID = document.location.pathname.split('/')[2];
+
+    // Returns if this is the currently editted starship
+    if (starship.id == currentID) {
+      return;
     }
 
-    return errors;
-  }
+    // State
+    // Sets the ship to the current
+    history.pushState({ starship: starship.id }, starship.name, '/ships/' + starship.id);
+    this.attr.starshipID = starship.id;
 
-  this.showErrors = function(errors) {
-    errors.forEach(function(error) {
-      var key = Object.keys(error)[0];
-      var field = this.node.querySelector('[name="' + key + '"]');
-      var parent = field ? field.parentElement : null;
-      var messageField = parent ? parent.querySelector('.r-error-message') : null;
-
-      if (parent) {
-        parent.classList.add('r-error');
-        messageField.innerHTML = error[key];
-      }
-    }, this);
-  }
+    this.node.innerHTML = template.render({
+      starship: starship,
+      smallcraft: bootstrap.smallcraft,
+      pointDefenseWeapons: bootstrap.pointDefenseWeapons,
+      primaryWeapons: bootstrap.primaryWeapons,
+      configurations: bootstrap.configurations
+    });
+  };
 
   this.getShipAttributes = function() {
     var attributes = this.serialize();
@@ -70,19 +95,19 @@ module.exports = flight.component(withFormUtils, function() {
     attributes.ftl = attributes.ftl ? parseInt(attributes.ftl) : 0;
 
     // Be sure there is an ID TEMP!
+    this.attr.id = document.location.pathname.split('/')[2];
     if (this.attr.id != 'new') {
       attributes.id = this.attr.id;
     }
-
-    debugger
 
     return attributes;
   }
 
   this.after('initialize', function() {
-    this.attr.id = document.location.pathname.split('/')[2];
     this.on('keyup', {
-      'inputFields': flight.utils.debounce(this.updateShip, 700)
+      'inputFields': this.updateShip
     });
+    this.attr.starshipID = ShipDispatcher.getStore('ship').currentShip.id;
+    ShipDispatcher.on('change:all', this.displayShip.bind(this));
   });
 });

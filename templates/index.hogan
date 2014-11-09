@@ -9,3 +9,7 @@
 <div id="starships">
   {{> ships/_ship.hogan }}
 </div>
+
+<script>
+  {{> _bootstrap.hogan }}
+</script>

@@ -3,13 +3,23 @@
     <!-- <input name="id" value="{{ id }}" type="hidden" /> -->
     <div class="r-field">
       <label for="shipName">Name</label>
-      <input type="text" name="name" id="shipName" value="{{ Name }}" placeholder="Name" />
+      <input autocomplete="off"
+             type="text"
+             name="name"
+             id="shipName"
+             value="{{ name }}"
+             placeholder="Name" />
       <span class="r-error-message"></span>
     </div>
 
     <div class="r-field">
       <label for="shipMass">Mass</label>
-      <input type="text" name="mass" id="shipMass" value="{{ Mass }}" placeholder="Mass" />
+      <input autocomplete="off"
+             type="text"
+             name="mass"
+             id="shipMass"
+             value="{{ mass }}"
+             placeholder="Mass" />
       <span class="r-error-message"></span>
     </div>
 

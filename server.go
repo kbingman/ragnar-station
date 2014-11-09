@@ -33,8 +33,8 @@ type Configuration struct {
 }
 
 type Starship struct {
-  Id bson.ObjectId `bson:"_id" string:"id" json:"id"`
-  Name string `string:"name" json:"name"`
+  Id bson.ObjectId `bson:"_id" json:"id"`
+  Name string `map:"name" json:"name"`
   Configuration string `json:"configuration"`
   Mass int64 `json:"mass"`
   Thrust int64 `json:"thrust"`
@@ -43,6 +43,15 @@ type Starship struct {
   PointDefenseWeapons []Weapon `json:"pointDefenseWeapons"`
   BatteryWeapons []Weapon `json:"batteryWeapons"`
   SmallCraft []Starship `json:"smallCraft"`
+}
+
+type StarshipMustache struct {
+  id string
+  name string
+  configuration string
+  mass int64
+  thrust int64
+  ftl int64
 }
 
 type StarshipJSON struct {
@@ -109,11 +118,15 @@ func updateStarship(w http.ResponseWriter, r *http.Request, params httprouter.Pa
   err = json.NewDecoder(r.Body).Decode(&starshipJSON)
   if err != nil {panic(err)}
 
+  starship := starshipJSON.Starship
+  starship.Id = id
+
   // Update the database
   err = collection.Update(bson.M{"_id":id},
     bson.M{
         "name": starshipJSON.Starship.Name,
         "mass": starshipJSON.Starship.Mass,
+        "configuration": starshipJSON.Starship.Configuration,
         "_id": id,
     })
   if err == nil {
@@ -121,7 +134,10 @@ func updateStarship(w http.ResponseWriter, r *http.Request, params httprouter.Pa
   } else {
     panic(err)
   }
-  w.WriteHeader(http.StatusNoContent)
+  json, err := json.Marshal(StarshipJSON{Starship: starship})
+  if err != nil { panic(err) }
+  w.Header().Set("Content-Type", "application/json")
+  w.Write(json)
 }
 
 func deleteStarship(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
@@ -162,17 +178,26 @@ func renderIndex(w http.ResponseWriter, req *http.Request, _ httprouter.Params) 
 
 func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 
+  var starshipMap map[string]interface{}
+  var starships []map[string]interface{}
+  var starship map[string]interface{}
+
   id := params.ByName("id")
   iter := collection.Find(nil).Iter()
-  starship := Starship{}
-  starships := []Starship{}
   result := Starship{}
 
   for iter.Next(&result) {
-    if result.Id.Hex() == id {
-      starship = result
+    // Make a mustache friend map for each starship
+    starshipMap = map[string]interface{}{
+      "id": result.Id.Hex(),
+      "name": result.Name,
+      "configuration": result.Configuration,
+      "mass": result.Mass,
     }
-    starships = append(starships, result)
+    if result.Id.Hex() == id {
+      starship = starshipMap
+    }
+    starships = append(starships, starshipMap)
   }
 
   configurations := []*Configuration{
@@ -204,7 +229,6 @@ func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Para
     "configurations": configurations,
     "starships": starships,
     "starship": starship,
-
     "primaryWeapons": primaryWeapons,
     "pointDefenseWeapons": pointDefenseWeapons,
   }
