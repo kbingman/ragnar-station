@@ -35,7 +35,7 @@ module.exports = function() {
     });
   };
 
-  this.updateShip = function(e, data) {
+  this.putShip = function(e, data) {
     this.request({
       'xhr': {
         'path': 'ships/' + data.id,

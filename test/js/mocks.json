@@ -1,0 +1,10 @@
+{
+  "starships": [
+    { "id": "545c53a77c6e192dc6000001", "name": "Credibility Problem", "mass": "1000000", "configuration": "Sphere" },
+    { "id": "545c565f7c6e192dc6000003", "name": "Not Invented Here", "mass": "50000", "configuration": "Needle" },
+    { "id": "545c56a47c6e192dc6000004", "name": "I Blame My Mother", "mass": "10099", "configuration": "Sphere" },
+    { "id": "545c59e47c6e192dc6000005", "name": "I Blame Your Mother", "mass": "10000", "configuration": "Needle" },
+    { "id": "545c5cef7c6e192dc6000006", "name": "Falling Outside The Normal Moral Constraints", "mass": "100000000", "configuration": "Needle" },
+    { "id": "545c5d957c6e192dc6000007", "name": "Absolutely No You-Know-What", "mass": "100000", "configuration": "Needle" },
+  ]
+}

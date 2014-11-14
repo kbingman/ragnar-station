@@ -4,8 +4,6 @@
   {{> ships/_form.hogan }}
 </div>
 
-<a data-new="ship" href="/ships/new">New Ship</a>
-
 <div id="starships">
   {{> ships/_ship.hogan }}
 </div>

@@ -1,7 +1,9 @@
+var source = require('vinyl-source-stream');
+var browserify = require('browserify');
 var gulp = require('gulp');
 var rename = require('gulp-rename');
-var browserify = require('gulp-browserify');
 var uglify = require('gulp-uglify');
+var streamify = require('gulp-streamify');
 
 gulp.task('styles', function() {
   gulp.src('./src/sass/app.scss')
@@ -14,16 +16,17 @@ gulp.task('styles', function() {
 });
 
 gulp.task('scripts', function() {
-  gulp.src('./src/js/app.js')
-    .pipe(browserify({
-      debug: true,
-      transform: ['hoganify']
-    }))
+  var bundleStream = browserify('./src/js/app.js', { debug: true })
+    .transform('hoganify')
+    .bundle();
+
+  bundleStream
+    .pipe(source('app.js'))
     .pipe(rename('bundle.js'))
     .pipe(gulp.dest('./public/js'))
-    .pipe(uglify())
+    .pipe(streamify(uglify()))
     .pipe(rename('bundle.min.js'))
-    .pipe(gulp.dest('./public/js'));
+    .pipe(gulp.dest('./public/js'))
 });
 
 gulp.task('watch', function() {

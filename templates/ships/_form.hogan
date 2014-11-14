@@ -1,6 +1,6 @@
 {{# starship }}
   <form id="createStarship">
-    <!-- <input name="id" value="{{ id }}" type="hidden" /> -->
+    {{# id }}<input name="id" value="{{ id }}" type="hidden" />{{/ id }}
     <div class="r-field">
       <label for="shipName">Name</label>
       <input autocomplete="off"

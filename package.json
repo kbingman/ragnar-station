@@ -17,15 +17,28 @@
   },
   "homepage": "https://github.com/kbingman/ragnar-station",
   "devDependencies": {
+    "browserify": "^6.2.0",
+    "chai": "^1.9.2",
     "delorean.js": "^0.8.4",
+    "es6-promise": "^2.0.0",
     "gulp": "^3.8.8",
     "gulp-browserify": "^0.5.0",
     "gulp-hogan-compile": "^0.2.1",
     "gulp-rename": "^1.2.0",
+    "gulp-streamify": "0.0.5",
     "gulp-uglify": "^1.0.1",
     "hogan.js": "^3.0.2",
     "hoganify": "^0.2.0",
     "jquery": "^2.1.1",
-    "es6-promise": "^2.0.0"
+    "karma": "^0.12.24",
+    "karma-browserifast": "^0.7.0",
+    "karma-chrome-launcher": "^0.1.5",
+    "karma-ios-launcher": "0.0.3",
+    "karma-mocha": "^0.1.9",
+    "karma-phantomjs-launcher": "^0.1.4",
+    "karma-safari-launcher": "^0.1.1",
+    "karma-spec-reporter": "0.0.13",
+    "mocha": "^2.0.1",
+    "vinyl-source-stream": "^1.0.0"
   }
 }

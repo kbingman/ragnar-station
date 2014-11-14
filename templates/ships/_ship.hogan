@@ -1,6 +1,7 @@
+<a data-new="ship" href="/ships/new">New Ship</a>
 {{# starships }}
-  <div id="ship-{{ id }}">
-    <a href="/ships/{{ id }}" class="r-action" data-edit="{{ id }}">
+  <div id="ship-{{ id }}" class="r-ship">
+    <a href="/ships/{{ id }}" class="r-action r-ship-name" data-edit="{{ id }}">
       {{ name }}
     </a>
     {{ mass }} tonnes {{ configuration }}

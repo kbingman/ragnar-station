@@ -11,11 +11,15 @@ var withShipXHR = require('../mixin/with_ship_xhr.js');
 module.exports = flight.component(withAjax, withShipXHR, function() {
 
   this.addShip = function(e, data) {
-    console.log('add', data)
-    ShipDispatcher.add(data.starship);
+
+    // ShipDispatcher.add(data.starship);
     // need to get ship from the Store
     this.createShip(e, data);
   };
+
+  this.clearShip = function(e, data) {
+    ShipDispatcher.find({ id: 'new' });
+  }
 
   this.needsShip = function(e, data) {
     this.getAllShips(e, data);
@@ -33,21 +37,26 @@ module.exports = flight.component(withAjax, withShipXHR, function() {
   this.updateShip = function(e, data) {
     ShipDispatcher.update(data);
     // need to get ship from the Store
-    console.log(data.id);
+    console.log('actions#updateShip', data.id);
     this.update.call(this, e, data);
   };
 
-  this.update = flight.utils.throttle(function(e, data){
-    this.updateShip(e, data);
-  }, 5000);
-
-  this.log = function(e, data) {
-    console.log('data', data);
-  };
-
-  this.editShipData = function(e, data) {
+  this.editShip = function(e, data) {
     ShipDispatcher.find(data);
   };
+
+  this.update = flight.utils.throttle(function(e, data){
+    this.putShip(e, data);
+  }, 5000);
+
+  this.addCreatedShip = function(e, data) {
+    console.log('created', data)
+    ShipDispatcher.add(data.starship);
+  }
+
+  // this.log = function(e, data) {
+  //   console.log('data', data);
+  // };
 
   this.after('initialize', function() {
     this.on(document, 'displayShipInfo', this.displayShip);
@@ -57,11 +66,12 @@ module.exports = flight.component(withAjax, withShipXHR, function() {
     this.on(document, 'updateShip', this.updateShip);
     this.on(document, 'deleteShip', this.removeShip);
     this.on(document, 'editShip', this.editShip);
+    this.on(document, 'newShip', this.clearShip);
 
     // temp
-    this.on(document, 'addNewShipData', this.log);
-    this.on(document, 'removeShipData', this.log);
-    this.on(document, 'updateShipData', this.log);
+    this.on(document, 'addNewShipData', this.addCreatedShip);
+    // this.on(document, 'removeShipData', this.log);
+    // this.on(document, 'updateShipData', this.log);
   });
 
 });

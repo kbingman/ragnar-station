@@ -157,25 +157,6 @@ func renderHTML(template string, context map[string]interface{}) string {
   return mustache.RenderFileInLayout(filename, layoutPath, context)
 }
 
-func renderIndex(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-  w.Header().Set("Content-Type", "text/html")
-
-  starships := []Starship{}
-  iter := collection.Find(nil).Iter()
-  result := Starship{}
-
-  for iter.Next(&result) {
-    starships = append(starships, result)
-  }
-
-  context := map[string]interface{}{
-    "title": "Ragnar Station",
-    "starships": starships,
-  }
-
-  fmt.Fprint(w, renderHTML("index", context))
-}
-
 func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 
   var starshipMap map[string]interface{}
@@ -242,7 +223,7 @@ func main() {
   router := httprouter.New()
 
   // HTML Routes
-  router.GET("/", renderIndex)
+  router.GET("/", renderShip)
   router.GET("/ships/:id", renderShip)
 
   // JSON API routes

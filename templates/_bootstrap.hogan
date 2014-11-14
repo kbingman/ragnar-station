@@ -1,4 +1,4 @@
-var bootstrap = {
+window.bootstrap = {
   configurations: [
     {{# configurations }}{{> ships/_attributes.hogan }}{{/ configurations }}
   ],
