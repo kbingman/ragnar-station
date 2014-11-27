@@ -1,25 +1,28 @@
 {{# starship }}
   <form id="createStarship">
     {{# id }}<input name="id" value="{{ id }}" type="hidden" />{{/ id }}
+    {{# uuid }}<input name="uuid" value="{{ uuid }}" type="hidden" />{{/ uuid }}
     <div class="r-field">
-      <label for="shipName">Name</label>
-      <input autocomplete="off"
-             type="text"
-             name="name"
-             id="shipName"
-             value="{{ name }}"
-             placeholder="Name" />
+      <!-- <label for="shipName">Name</label> -->
+      <h2 name="name"
+          id="shipName"
+          contenteditable="true"
+          placeholder="Name">
+        {{ name }}
+      </h2>
       <span class="r-error-message"></span>
     </div>
 
     <div class="r-field">
-      <label for="shipMass">Mass</label>
-      <input autocomplete="off"
-             type="text"
-             name="mass"
-             id="shipMass"
-             value="{{ mass }}"
-             placeholder="Mass" />
+      <h3>
+        <span type="text"
+            name="mass"
+            id="shipmass"
+            contenteditable="true"
+            placeholder="mass">
+          {{ mass }}
+        </span>m
+      </h3>
       <span class="r-error-message"></span>
     </div>
 

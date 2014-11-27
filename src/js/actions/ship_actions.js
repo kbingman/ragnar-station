@@ -10,63 +10,52 @@ var withShipXHR = require('../mixin/with_ship_xhr.js');
 
 module.exports = flight.component(withAjax, withShipXHR, function() {
 
-  this.addShip = function(e, data) {
-
-    // ShipDispatcher.add(data.starship);
-    // need to get ship from the Store
-    this.createShip(e, data);
-  };
-
-  this.clearShip = function(e, data) {
-    ShipDispatcher.find({ id: 'new' });
+  this.newShip = function(e, data) {
+    this.trigger(document, 'showNewShip')
   }
-
-  this.needsShip = function(e, data) {
-    this.getAllShips(e, data);
-  };
-
-  this.displayShip = function(e, data) {
-    ShipDispatcher.reset(data);
-  };
 
   this.removeShip = function(e, data) {
     ShipDispatcher.delete(data);
     this.deleteShip(e, data);
+    this.trigger(document, 'showNewShip');
   };
 
   this.updateShip = function(e, data) {
     ShipDispatcher.update(data);
-    // need to get ship from the Store
-    console.log('actions#updateShip', data.id);
-    this.update.call(this, e, data);
+
+    this.save(ShipDispatcher.getStore('ship').currentShip);
   };
+
+  this.save = flight.utils.debounce(function(ship){
+    if (ship.id) {
+      this.putShip(null, ship);
+    } else {
+      this.createShip(null, ship);
+    }
+  }, 500);
 
   this.editShip = function(e, data) {
     ShipDispatcher.find(data);
+    this.trigger(document, 'displayShip')
   };
 
-  this.update = flight.utils.throttle(function(e, data){
-    this.putShip(e, data);
-  }, 5000);
+  this.displayShips = function(e, data) {
+    ShipDispatcher.reset(data);
+  };
 
   this.addCreatedShip = function(e, data) {
-    console.log('created', data)
-    ShipDispatcher.add(data.starship);
-  }
-
-  // this.log = function(e, data) {
-  //   console.log('data', data);
-  // };
+    console.log('created', data.starship);
+    ShipDispatcher.update(data.starship);
+  };
 
   this.after('initialize', function() {
-    this.on(document, 'displayShipInfo', this.displayShip);
+    this.on(document, 'displayShipInfo', this.displayShips);
 
-    this.on(document, 'getShips', this.needsShip);
-    this.on(document, 'createShip', this.addShip);
+    this.on(document, 'getShips', this.getAllShips);
     this.on(document, 'updateShip', this.updateShip);
     this.on(document, 'deleteShip', this.removeShip);
     this.on(document, 'editShip', this.editShip);
-    this.on(document, 'newShip', this.clearShip);
+    this.on(document, 'newShip', this.newShip);
 
     // temp
     this.on(document, 'addNewShipData', this.addCreatedShip);

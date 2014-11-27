@@ -37,7 +37,7 @@ module.exports = Flux.createStore({
 
   actions: {
     'reset': 'resetShips',
-    'add': 'addShip',
+    // 'add': 'addShip',
     'find': 'setCurrentShip',
     'delete': 'removeShip',
     'update': 'updateShip'
@@ -63,18 +63,20 @@ module.exports = Flux.createStore({
     this.emit('change');
   },
 
-  addShip: function(data) {
-    this.currentShip = this.calculate(data);
-    this.ships.push(this.currentShip);
-    this.emit('change');
-  },
-
   updateShip: function(data) {
-    var ship = this.find(data.id);
+    var id = data.uuid || data.id;
+    var ship = this.find(id);
     var index = this.ships.indexOf(ship);
 
-    this.currentShip = data;
-    this.ships[index] = this.currentShip;
+    console.log(ship)
+
+    this.currentShip = this.calculate(data);
+    if (this.ships[index]) {
+      this.ships[index] = this.currentShip;
+    } else {
+      this.ships.push(this.currentShip)
+    }
+
     this.emit('change');
   },
 
@@ -88,17 +90,33 @@ module.exports = Flux.createStore({
   },
 
   find: function(id) {
+    console.log(id)
     return this.ships.filter(function(s) {
-      return s.id == id;
+      return s.uuid == id || s.id == id;
     })[0];
+  },
+
+  /**
+  * Util method. Generates a unique ID
+  */
+  generateUID: function() {
+    return ('00000000' + (Math.random() * Math.pow(16, 8) << 0).toString(16)).slice(-8);
   },
 
   calculate: function(ship) {
     if (!ship) {
       return;
     }
-    var bridge = ship.mass * BRIDGE_PERCENTAGE;
 
+    // Cast attributes into correct type
+    ship.mass = isNaN(parseInt(ship.mass)) ? 0 : parseInt(ship.mass);
+    ship.thrust = ship.thrust ? parseInt(ship.thrust) : 0;
+    ship.ftl = ship.ftl ? parseInt(ship.ftl) : 0;
+    ship.name = ship.name.replace(/\\n/,'').trim();
+    ship.uuid = ship.uuid || this.generateUID();
+
+    // Calculate ship parts
+    var bridge = ship.mass * BRIDGE_PERCENTAGE;
     ship.bridge = Math.round(bridge > MIN_BRIDGE_MASS ? bridge : MIN_BRIDGE_MASS);
 
     return ship;

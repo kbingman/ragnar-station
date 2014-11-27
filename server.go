@@ -34,7 +34,8 @@ type Configuration struct {
 
 type Starship struct {
   Id bson.ObjectId `bson:"_id" json:"id"`
-  Name string `map:"name" json:"name"`
+  Uuid string `json:"uuid"`
+  Name string `json:"name"`
   Configuration string `json:"configuration"`
   Mass int64 `json:"mass"`
   Thrust int64 `json:"thrust"`
@@ -85,6 +86,7 @@ func createStarship(w http.ResponseWriter, req *http.Request, _ httprouter.Param
 
     json, err := json.Marshal(StarshipJSON{Starship: starship})
     if err != nil { panic(err) }
+
     w.Header().Set("Content-Type", "application/json")
     w.Write(json)
 }
@@ -125,6 +127,7 @@ func updateStarship(w http.ResponseWriter, r *http.Request, params httprouter.Pa
   err = collection.Update(bson.M{"_id":id},
     bson.M{
         "name": starshipJSON.Starship.Name,
+        "uuid": starshipJSON.Starship.Uuid,
         "mass": starshipJSON.Starship.Mass,
         "configuration": starshipJSON.Starship.Configuration,
         "_id": id,
@@ -171,6 +174,7 @@ func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Para
     // Make a mustache friend map for each starship
     starshipMap = map[string]interface{}{
       "id": result.Id.Hex(),
+      "uuid": result.Uuid,
       "name": result.Name,
       "configuration": result.Configuration,
       "mass": result.Mass,

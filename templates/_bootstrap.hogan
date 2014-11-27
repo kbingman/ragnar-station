@@ -13,10 +13,10 @@ window.bootstrap = {
   ],
   starships: [
     {{# starships }}
-      { id: "{{ id }}", name: "{{ name }}", mass: "{{ mass }}", configuration: "{{ configuration }}" },
+      { id: "{{ id }}", uuid: "{{ uuid }}", name: "{{ name }}", mass: "{{ mass }}", configuration: "{{ configuration }}" },
     {{/ starships }}
   ],
   {{# starship }}
-  starship: { id: "{{ id }}", name: "{{ name }}" , mass: "{{ mass }}" }
+  starship: { id: "{{ id }}", uuid: "{{ uuid }}", name: "{{ name }}" , mass: "{{ mass }}" }
   {{/ starship }}
 }
