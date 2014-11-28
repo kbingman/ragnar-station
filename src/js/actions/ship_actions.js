@@ -44,7 +44,6 @@ module.exports = flight.component(withAjax, withShipXHR, function() {
   };
 
   this.addCreatedShip = function(e, data) {
-    console.log('created', data.starship);
     ShipDispatcher.update(data.starship);
   };
 

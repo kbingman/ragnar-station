@@ -68,8 +68,6 @@ module.exports = Flux.createStore({
     var ship = this.find(id);
     var index = this.ships.indexOf(ship);
 
-    console.log(ship)
-
     this.currentShip = this.calculate(data);
     if (this.ships[index]) {
       this.ships[index] = this.currentShip;
@@ -90,7 +88,6 @@ module.exports = Flux.createStore({
   },
 
   find: function(id) {
-    console.log(id)
     return this.ships.filter(function(s) {
       return s.uuid == id || s.id == id;
     })[0];

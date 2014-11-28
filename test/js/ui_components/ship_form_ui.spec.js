@@ -13,7 +13,6 @@ describe('ui_component/ship_form_ui', function(){
 
   afterEach(function(){
     component = (new shipForm()).initialize(element);
-    // Dispatcher.reset([]);
   });
 
   it('should work', function() {

@@ -24,12 +24,17 @@ describe('stores/ship_stores', function(){
       expect(ships[0].bridge).to.equal(20000);
     });
 
+    it('should return a UUID even if the ship does not have one', function() {
+      var ships = Dispatcher.getStore('ship').ships;
+      expect(ships[0].uuid.length).to.equal(8);
+    });
+
   });
 
   describe('Ship Store events', function() {
 
     it('should add a ship and set it as current', function() {
-      Dispatcher.add({
+      Dispatcher.update({
         id: '545f1f949c46d83e4e00000d',
         name: 'Of Course I Still Love You',
         mass: '100000',
@@ -38,6 +43,19 @@ describe('stores/ship_stores', function(){
       var ship = Dispatcher.getStore('ship').currentShip;
 
       expect(ship.name).to.equal('Of Course I Still Love You');
+    });
+
+    it('should add a ship and set a UUID for it', function() {
+      Dispatcher.update({
+        id: '545f1f949c46d83e4e00000f',
+        name: 'Me, I\'m Counting',
+        mass: '100000',
+        configuration: 'Sphere'
+      });
+      var ship = Dispatcher.getStore('ship').currentShip;
+
+      expect(ship.uuid).to.be.defined;
+      expect(ship.uuid.length).to.equal(8);
     });
 
     it('should remove a ship', function() {

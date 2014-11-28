@@ -12,12 +12,9 @@ module.exports = flight.component(withFormUtils, function() {
 
   this.updateShip = function(e, data) {
     e.preventDefault();
-    var currentID = document.location.pathname.split('/')[2];
+
     var attributes = this.serialize();
-
     attributes.id = this.attr.id;
-
-    console.log(attributes);
 
     this.trigger('updateShip', attributes);
   };
@@ -49,7 +46,9 @@ module.exports = flight.component(withFormUtils, function() {
   this.displayNewShip = function() {
     this.attr.id = undefined;
     this.node.innerHTML = template.render({
-      starship: {},
+      starship: {
+        mass: 0
+      },
       smallcraft: bootstrap.smallcraft,
       pointDefenseWeapons: bootstrap.pointDefenseWeapons,
       primaryWeapons: bootstrap.primaryWeapons,
@@ -59,6 +58,8 @@ module.exports = flight.component(withFormUtils, function() {
   };
 
   this.after('initialize', function() {
+    this.attr.id = document.location.pathname.split('/')[2];
+
     this.on('keyup', {
       'inputFields': flight.utils.debounce(this.updateShip, 10)
     });
