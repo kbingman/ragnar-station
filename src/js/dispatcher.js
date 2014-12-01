@@ -3,9 +3,6 @@ var ShipStore = require('./stores/ship_store');
 
 module.exports = Flux.createDispatcher({
 
-  add: function(data) {
-    this.dispatch('add', data);
-  },
   find: function(data) {
     this.dispatch('find', data);
   },
@@ -17,6 +14,12 @@ module.exports = Flux.createDispatcher({
   },
   update: function(data) {
     this.dispatch('update', data);
+  },
+  increase: function(data) {
+    this.dispatch('increase', data);
+  },
+  decrease: function(data) {
+    this.dispatch('decrease', data);
   },
   getStores: function() {
     return {

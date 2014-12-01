@@ -11,7 +11,7 @@ module.exports = flight.component(function() {
   };
 
   /**
-   * Matches the element data attibute with functions, thereby triggering
+   * Matches the element data attribute with functions, thereby triggering
    * the correct event. If no matching function is found, the event uses the
    * the default behaviour.
    */
@@ -36,8 +36,6 @@ module.exports = flight.component(function() {
   this.delete = function(e, data){
     e.preventDefault();
     this.trigger('deleteShip', { id: data });
-    // ShipDispatcher.delete({ id: data });
-    // ShipDispatcher.dispatch('delete', { id: data });
   }
 
   this.after('initialize', function() {

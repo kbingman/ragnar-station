@@ -19,7 +19,7 @@
   "devDependencies": {
     "browserify": "^6.2.0",
     "chai": "^1.9.2",
-    "delorean.js": "^0.8.4",
+    "delorean.js": "git://github.com/deloreanjs/delorean.git#master",
     "es6-promise": "^2.0.0",
     "flux": "^2.0.1",
     "gulp": "^3.8.8",
@@ -38,8 +38,10 @@
     "karma-mocha": "^0.1.9",
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-safari-launcher": "^0.1.1",
+    "karma-sinon": "^1.0.4",
     "karma-spec-reporter": "0.0.13",
     "mocha": "^2.0.1",
+    "sinon": "^1.12.1",
     "vinyl-source-stream": "^1.0.0"
   }
 }

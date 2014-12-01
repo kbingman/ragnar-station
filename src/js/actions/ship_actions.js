@@ -47,6 +47,16 @@ module.exports = flight.component(withAjax, withShipXHR, function() {
     ShipDispatcher.update(data.starship);
   };
 
+  this.increaseShipAttr = function(e, data) {
+    ShipDispatcher.increase(data.attr);
+    this.save(ShipDispatcher.getStore('ship').currentShip);
+  };
+
+  this.decreaseShipAttr = function(e, data) {
+    ShipDispatcher.decrease(data.attr);
+    this.save(ShipDispatcher.getStore('ship').currentShip);
+  };
+
   this.after('initialize', function() {
     this.on(document, 'displayShipInfo', this.displayShips);
 
@@ -55,6 +65,8 @@ module.exports = flight.component(withAjax, withShipXHR, function() {
     this.on(document, 'deleteShip', this.removeShip);
     this.on(document, 'editShip', this.editShip);
     this.on(document, 'newShip', this.newShip);
+    this.on(document, 'increaseShipAttr', this.increaseShipAttr);
+    this.on(document, 'decreaseShipAttr', this.decreaseShipAttr);
 
     // temp
     this.on(document, 'addNewShipData', this.addCreatedShip);

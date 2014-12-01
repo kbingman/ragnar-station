@@ -29,6 +29,7 @@ type Weapon struct {
 type Configuration struct {
   Id int64
   Name string
+  Selected bool
   // CostFactor int64
 }
 
@@ -39,6 +40,7 @@ type Starship struct {
   Configuration string `json:"configuration"`
   Mass int64 `json:"mass"`
   Thrust int64 `json:"thrust"`
+  Reactor int64 `json:"reactor"`
   Ftl int64 `json:"ftl"`
   PrimaryWeapon Weapon `json:"primaryWeapon"`
   PointDefenseWeapons []Weapon `json:"pointDefenseWeapons"`
@@ -129,6 +131,9 @@ func updateStarship(w http.ResponseWriter, r *http.Request, params httprouter.Pa
         "name": starshipJSON.Starship.Name,
         "uuid": starshipJSON.Starship.Uuid,
         "mass": starshipJSON.Starship.Mass,
+        "thrust": starshipJSON.Starship.Thrust,
+        "reactor": starshipJSON.Starship.Reactor,
+        "ftl": starshipJSON.Starship.Ftl,
         "configuration": starshipJSON.Starship.Configuration,
         "_id": id,
     })
@@ -171,13 +176,16 @@ func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Para
   result := Starship{}
 
   for iter.Next(&result) {
-    // Make a mustache friend map for each starship
+    // Make a mustache friendly map for each starship
     starshipMap = map[string]interface{}{
       "id": result.Id.Hex(),
       "uuid": result.Uuid,
       "name": result.Name,
       "configuration": result.Configuration,
       "mass": result.Mass,
+      "thrust": result.Thrust,
+      "reactor": result.Reactor,
+      "ftl": result.Ftl,
     }
     if result.Id.Hex() == id {
       starship = starshipMap
@@ -186,27 +194,32 @@ func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Para
   }
 
   configurations := []*Configuration{
-    {1, "Needle"},
-    {2, "Wedge"},
-    {3, "Sphere"},
-    {4, "Wheel"},
-    {6, "Skeletal"},
-    {5, "Planetoid"},
+    {1, "Needle", starship["configuration"] == "Needle"},
+    {2, "Wedge", starship["configuration"] == "Wedge"},
+    {3, "Sphere", starship["configuration"] == "Sphere"},
+    {4, "Wheel", starship["configuration"] == "Wheel"},
+    {6, "Skeletal", starship["configuration"] == "Skeletal"},
+    {5, "Planetoid", starship["configuration"] == "Planetoid"},
   }
 
   primaryWeapons := []*Weapon{
-    {1, "MissleTubes"},
-    {2, "CaptialRailgun"},
-    {3, "MassDriver"},
-    {4, "ParticleAccerator"},
-    {5, "AntiMatterDriver"},
+    {1, "Missle Tubes"},
+    {2, "Railgun"},
+    {3, "Mass Driver"},
+    {4, "Particle Accerator"},
+  }
+
+  batteryWeapons := []*Weapon{
+    {1, "Missle Launcher"},
+    {2, "Beam Laser"},
+    {3, "Railgun"},
+    {4, "Gauss Gun"},
   }
 
   pointDefenseWeapons := []*Weapon{
-    {1, "MissleLauncher"},
-    {2, "BeamLaser"},
-    {3, "Railgun"},
-    {4, "GaussGun"},
+    {2, "Projectile"},
+    {2, "Beam Laser"},
+    {4, "Gauss Gun"},
   }
 
   context := map[string]interface{}{
@@ -215,6 +228,7 @@ func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Para
     "starships": starships,
     "starship": starship,
     "primaryWeapons": primaryWeapons,
+    "batteryWeapons": batteryWeapons,
     "pointDefenseWeapons": pointDefenseWeapons,
   }
 

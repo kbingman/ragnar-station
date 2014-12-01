@@ -5,11 +5,9 @@
     <div class="r-field">
       <!-- <label for="shipName">Name</label> -->
       <h2 name="name"
-          id="shipName"
+          id="shipname"
           contenteditable="true"
-          placeholder="Name">
-        {{ name }}
-      </h2>
+          placeholder="Name">{{ name }}</h2>
       <span class="r-error-message"></span>
     </div>
 
@@ -22,6 +20,11 @@
             placeholder="mass">
           {{ mass }}
         </span>m
+
+        remaining<span type="text"
+          placeholder="mass">
+          {{ remaining }}
+        </span>
       </h3>
       <span class="r-error-message"></span>
     </div>
@@ -30,7 +33,9 @@
       <label for="shipConfiguration">Configuration</label>
       <select name="configuration" id="shipConfiguration">
         {{# configurations }}
-          <option value="{{ Name }}">{{ Name }}</option>
+          <option {{# Selected }}selected {{/ Selected }}value="{{ Name }}">
+            {{ Name }}
+          </option>
         {{/ configurations }}
       </select>
       <span class="r-error-message"></span>
@@ -38,25 +43,25 @@
 
     <div class="r-field">
       <label for="primaryWeapon">Thrust</label>
-      <span name="thrust" data-thrust>{{ Thrust }}</span>
-      <button data="">&#8593;</button>
-      <button data="">&#8595;</button>
+      <span name="thrust" data-thrust>{{ thrust }}</span>
+      <button data-up="thrust">&#8593;</button>
+      <button data-down="thrust">&#8595;</button>
       <span class="r-error-message"></span>
     </div>
 
     <div class="r-field">
       <label for="primaryWeapon">FTL Range</label>
-      <span name="ftl" data-ftl>{{ Ftl }}</span>
-      <button data="">&#8593;</button>
-      <button data="">&#8595;</button>
+      <span name="ftl" data-ftl>{{ ftl }}</span>
+      <button data-up="ftl">&#8593;</button>
+      <button data-down="ftl">&#8595;</button>
       <span class="r-error-message"></span>
     </div>
 
     <div class="r-field">
       <label for="reactor">Reactor</label>
       <span name="reactor" data-reactor>{{ reactor }}</span>
-      <button data="">&#8593;</button>
-      <button data="">&#8595;</button>
+      <button data-up="reactor">&#8593;</button>
+      <button data-down="reactor">&#8595;</button>
       <span class="r-error-message"></span>
     </div>
 
@@ -75,9 +80,9 @@
       <label for="batteryWeapons">Battery Weapons</label>
       <select id="batteryWeapons">
         <option value="">...</option>
-        {{# pointDefenseWeapons }}
+        {{# batteryWeapons }}
           <option value="{{ Name }}">{{ Name }}</option>
-        {{/ pointDefenseWeapons }}
+        {{/ batteryWeapons }}
       </select>
       <button id="addBattterButton">Add</button>
       <span class="r-error-message"></span>

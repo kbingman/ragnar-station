@@ -9,7 +9,7 @@ module.exports = function(config) {
 
 
     // frameworks to use
-    frameworks: ['mocha', 'browserify', 'chai'],
+    frameworks: ['mocha', 'browserify', 'chai', 'sinon'],
 
 
     // list of files / patterns to load in the browser
