@@ -20,17 +20,26 @@ var (
 )
 
 type Weapon struct {
-  Id int64
-  Name string
-  // CostFactor int64
-  // RequiredTechLevel int64
+  Id int `json:"id"`
+  Name string `json:"name"`
+  Cost int `json:"cost"`
+  // CostFactor int
+  // EnergyRequired int
+  // RequiredTechLevel int
+}
+
+type Battery struct {
+  Id int `json:"id"`
+  Name string `json:"name"`
+  Count int `json:"count"`
+  Cost int `json:"cost"`
 }
 
 type Configuration struct {
-  Id int64
-  Name string
-  Selected bool
-  // CostFactor int64
+  Id int `json:"id"`
+  Name string `json:"name"`
+  Cost float32 `json:"cost"`
+  Selected bool `json:"selected"`
 }
 
 type Starship struct {
@@ -43,18 +52,9 @@ type Starship struct {
   Reactor int64 `json:"reactor"`
   Ftl int64 `json:"ftl"`
   PrimaryWeapon Weapon `json:"primaryWeapon"`
-  PointDefenseWeapons []Weapon `json:"pointDefenseWeapons"`
-  BatteryWeapons []Weapon `json:"batteryWeapons"`
+  PointDefenseWeapons []Battery `json:"pointDefenseWeapons"`
+  BatteryWeapons []Battery `json:"batteryWeapons"`
   SmallCraft []Starship `json:"smallCraft"`
-}
-
-type StarshipMustache struct {
-  id string
-  name string
-  configuration string
-  mass int64
-  thrust int64
-  ftl int64
 }
 
 type StarshipJSON struct {
@@ -126,17 +126,7 @@ func updateStarship(w http.ResponseWriter, r *http.Request, params httprouter.Pa
   starship.Id = id
 
   // Update the database
-  err = collection.Update(bson.M{"_id":id},
-    bson.M{
-        "name": starshipJSON.Starship.Name,
-        "uuid": starshipJSON.Starship.Uuid,
-        "mass": starshipJSON.Starship.Mass,
-        "thrust": starshipJSON.Starship.Thrust,
-        "reactor": starshipJSON.Starship.Reactor,
-        "ftl": starshipJSON.Starship.Ftl,
-        "configuration": starshipJSON.Starship.Configuration,
-        "_id": id,
-    })
+  err = collection.Update(bson.M{"_id":id}, starshipJSON.Starship)
   if err == nil {
     log.Printf("Updated starship %s name to %s", id, starshipJSON.Starship.Name)
   } else {
@@ -144,6 +134,7 @@ func updateStarship(w http.ResponseWriter, r *http.Request, params httprouter.Pa
   }
   json, err := json.Marshal(StarshipJSON{Starship: starship})
   if err != nil { panic(err) }
+
   w.Header().Set("Content-Type", "application/json")
   w.Write(json)
 }
@@ -186,6 +177,9 @@ func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Para
       "thrust": result.Thrust,
       "reactor": result.Reactor,
       "ftl": result.Ftl,
+      "pointDefenseWeapons": result.PointDefenseWeapons,
+      "batteryWeapons": result.BatteryWeapons,
+      "primaryWeapon": result.PrimaryWeapon,
     }
     if result.Id.Hex() == id {
       starship = starshipMap
@@ -194,32 +188,34 @@ func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Para
   }
 
   configurations := []*Configuration{
-    {1, "Needle", starship["configuration"] == "Needle"},
-    {2, "Wedge", starship["configuration"] == "Wedge"},
-    {3, "Sphere", starship["configuration"] == "Sphere"},
-    {4, "Wheel", starship["configuration"] == "Wheel"},
-    {6, "Skeletal", starship["configuration"] == "Skeletal"},
-    {5, "Planetoid", starship["configuration"] == "Planetoid"},
+    {1, "Needle", 1.2, starship["configuration"] == "Needle"},
+    {2, "Wedge", 1.2, starship["configuration"] == "Wedge"},
+    {3, "Cone", 1.1, starship["configuration"] == "Cone"},
+    {4, "Cylinder", 1, starship["configuration"] == "Cylinder"},
+    {5, "Saucer", 0.8, starship["configuration"] == "Saucer"},
+    {6, "Sphere", 0.7, starship["configuration"] == "Sphere"},
+    {7, "Wheel", 0.6, starship["configuration"] == "Wheel"},
+    {8, "Skeletal", 0.5, starship["configuration"] == "Skeletal"},
+    {9, "Planetoid", 0.2, starship["configuration"] == "Planetoid"},
   }
 
   primaryWeapons := []*Weapon{
-    {1, "Missle Tubes"},
-    {2, "Railgun"},
-    {3, "Mass Driver"},
-    {4, "Particle Accerator"},
+    {1, "Railgun", 1},
+    {2, "Mass Driver", 1},
+    {3, "Ion Gun", 1},
   }
 
   batteryWeapons := []*Weapon{
-    {1, "Missle Launcher"},
-    {2, "Beam Laser"},
-    {3, "Railgun"},
-    {4, "Gauss Gun"},
+    {1, "Missle Tubes", 1},
+    {2, "Brilliant Pebble Launcher", 1},
+    {3, "Railgun", 1},
+    {4, "Gauss Gun", 1},
   }
 
   pointDefenseWeapons := []*Weapon{
-    {2, "Projectile"},
-    {2, "Beam Laser"},
-    {4, "Gauss Gun"},
+    {2, "Projectile", 1},
+    {3, "Pulse Laser", 1},
+    {4, "Railgun", 1},
   }
 
   context := map[string]interface{}{

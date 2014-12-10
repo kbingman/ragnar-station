@@ -1,5 +1,5 @@
-{{# starship }}
-  <form id="createStarship">
+<form id="createStarship">
+  {{# starship }}
     {{# id }}<input name="id" value="{{ id }}" type="hidden" />{{/ id }}
     {{# uuid }}<input name="uuid" value="{{ uuid }}" type="hidden" />{{/ uuid }}
     <div class="r-field">
@@ -33,8 +33,8 @@
       <label for="shipConfiguration">Configuration</label>
       <select name="configuration" id="shipConfiguration">
         {{# configurations }}
-          <option {{# Selected }}selected {{/ Selected }}value="{{ Name }}">
-            {{ Name }}
+          <option {{# selected }}selected {{/ selected }}value="{{ name }}">
+            {{ name }}
           </option>
         {{/ configurations }}
       </select>
@@ -42,7 +42,7 @@
     </div>
 
     <div class="r-field">
-      <label for="primaryWeapon">Thrust</label>
+      <label for="thrust">Thrust</label>
       <span name="thrust" data-thrust>{{ thrust }}</span>
       <button data-up="thrust">&#8593;</button>
       <button data-down="thrust">&#8595;</button>
@@ -50,7 +50,7 @@
     </div>
 
     <div class="r-field">
-      <label for="primaryWeapon">FTL Range</label>
+      <label for="ftl">FTL Range</label>
       <span name="ftl" data-ftl>{{ ftl }}</span>
       <button data-up="ftl">&#8593;</button>
       <button data-down="ftl">&#8595;</button>
@@ -70,46 +70,69 @@
       <select id="primaryWeapon">
         <option value="">...</option>
         {{# primaryWeapons }}
-          <option value="{{ Name }}">{{ Name }}</option>
+          <option value="{{ Id }}">{{ Name }}</option>
         {{/ primaryWeapons }}
       </select>
-      <span class="r-error-message"></span>
-    </div>
-
-    <div class="r-field">
-      <label for="batteryWeapons">Battery Weapons</label>
-      <select id="batteryWeapons">
+      <select id="primaryWeaponType">
         <option value="">...</option>
-        {{# batteryWeapons }}
-          <option value="{{ Name }}">{{ Name }}</option>
-        {{/ batteryWeapons }}
+        <option value="a">A</option>
       </select>
-      <button id="addBattterButton">Add</button>
       <span class="r-error-message"></span>
     </div>
-
     <div class="r-field">
-      <label for="pointDefenseWeapons">Point Defense Weapons</label>
-      <select id="pointDefenseWeapons">
-        <option value="">...</option>
-        {{# pointDefenseWeapons }}
-          <option value="{{ Name }}">{{ Name }}</option>
-        {{/ pointDefenseWeapons }}
-      </select>
-      <button id="addPointDefenseButton">Add</button>
-      <span class="r-error-message"></span>
+    {{# batteryWeapons }}
+      <div>{{ name }} &ndash; {{ count }}</div>
+    {{/ batteryWeapons }}
+    {{# pointDefenseWeapons }}
+    <div>{{ name }} &ndash; {{ count }}</div>
+    {{/ pointDefenseWeapons }}
     </div>
+  {{/ starship }}
+  <div class="r-field">
+    <label for="batteryWeapons">Battery Weapons</label>
+    <select data-weapon id="batteryWeapons">
+      <option value="">...</option>
+      {{# availableBatteryWeapons }}
+      <option value="{{ Id }}">{{ Name }}</option>
+      {{/ availableBatteryWeapons }}
+    </select>
+    <select data-count id="batteryWeaponCount">
+      <option value="">...</option>
+      {{# batteries }}
+      <option value="{{ . }}">{{ . }}</option>
+      {{/ batteries }}
+    </select>
+    <button data-add="batteryWeapons" id="addBattterButton">Add</button>
+    <span class="r-error-message"></span>
+  </div>
 
-    <div class="r-field">
-      <label for="smallcraft">Small Craft</label>
-      <select id="smallcraft">
-        <option value="">...</option>
-        {{# smallcraft }}
-          <option value="{{ . }}">{{ . }}</option>
-        {{/ smallcraft }}
-      </select>
-      <button data="">Add</button>
-      <span class="r-error-message"></span>
-    </div>
-  </form>
-{{/ starship }}
+  <div class="r-field">
+    <label for="pointDefenseWeapons">Point Defense Weapons</label>
+    <select data-weapon id="pointDefenseWeapons">
+      <option value="">...</option>
+      {{# availablePointDefenseWeapons }}
+      <option value="{{ Id }}">{{ Name }}</option>
+      {{/ availablePointDefenseWeapons }}
+    </select>
+    <select data-count id="pdWeaponCount">
+      <option value="">...</option>
+      {{# pdt }}
+      <option value="{{ . }}">{{ . }}</option>
+      {{/ pdt }}
+    </select>
+    <button data-add="pointDefenseWeapons" id="addPointDefenseButton">Add</button>
+    <span class="r-error-message"></span>
+  </div>
+
+  <div class="r-field">
+    <label for="smallcraft">Small Craft</label>
+    <select id="smallcraft">
+      <option value="">...</option>
+      {{# smallcraft }}
+      <option value="{{ . }}">{{ . }}</option>
+      {{/ smallcraft }}
+    </select>
+    <button data="">Add</button>
+    <span class="r-error-message"></span>
+  </div>
+</form>

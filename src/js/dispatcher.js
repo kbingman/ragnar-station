@@ -13,13 +13,18 @@ module.exports = Flux.createDispatcher({
     this.dispatch('delete', data);
   },
   update: function(data) {
-    this.dispatch('update', data);
+    this.dispatch('update', data).then(function(){
+      console.log('promise');
+    });
   },
   increase: function(data) {
     this.dispatch('increase', data);
   },
   decrease: function(data) {
     this.dispatch('decrease', data);
+  },
+  addWeapons: function(data) {
+    this.dispatch('addWeapons', data);
   },
   getStores: function() {
     return {

@@ -29,22 +29,30 @@ describe('ui_component/ship_listing_ui', function(){
   //   }, 100);
   // });
 
-  it('should render each ships name', function() {
-    var ships = component.node.querySelectorAll('.r-ship-name');
+  it('should render each ships name', function(next) {
+    setTimeout(function() {
+      var ships = component.node.querySelectorAll('.r-ship-name');
+      console.log(ships)
 
-    each(ships, function(a, i) {
-      var name = a.innerHTML.trim();
-      expect(name).to.equal(mocks.starships[i].name);
-    });
+      each(ships, function(a, i) {
+        var name = a.innerHTML.trim();
+        expect(name).to.equal(mocks.starships[i].name);
+      });
+      next();
+    }, 1);
+
   });
 
-  it('should render a data-edit attribute for each ship with id', function() {
-    var ships = component.node.querySelectorAll('.r-ship-name');
+  it('should render a data-edit attribute for each ship with id', function(next) {
+    setTimeout(function() {
+      var ships = component.node.querySelectorAll('.r-ship-name');
 
-    each(ships, function(a, i) {
-      var id = a.dataset.edit;
-      expect(id).to.equal(mocks.starships[i].id);
-    });
+      each(ships, function(a, i) {
+        var id = a.dataset.edit;
+        expect(id).to.equal(mocks.starships[i].id);
+      });
+      next();
+    }, 1);
   });
 
 });

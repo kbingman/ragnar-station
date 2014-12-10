@@ -26,17 +26,17 @@ module.exports = flight.component(withAjax, withShipXHR, function() {
     this.save(ShipDispatcher.getStore('ship').currentShip);
   };
 
-  this.save = flight.utils.debounce(function(ship){
+  this.save = flight.utils.throttle(function(ship){
     if (ship.id) {
       this.putShip(null, ship);
     } else {
       this.createShip(null, ship);
     }
-  }, 500);
+  }, 2000);
 
   this.editShip = function(e, data) {
     ShipDispatcher.find(data);
-    this.trigger(document, 'displayShip')
+    this.trigger(document, 'displayShip');
   };
 
   this.displayShips = function(e, data) {
@@ -57,7 +57,17 @@ module.exports = flight.component(withAjax, withShipXHR, function() {
     this.save(ShipDispatcher.getStore('ship').currentShip);
   };
 
+  this.addWeapons = function(e, data) {
+    ShipDispatcher.addWeapons(data);
+    this.save(ShipDispatcher.getStore('ship').currentShip);
+  };
+
+  this.init = function() {
+    this.getAllShips();
+  }
+
   this.after('initialize', function() {
+    this.init();
     this.on(document, 'displayShipInfo', this.displayShips);
 
     this.on(document, 'getShips', this.getAllShips);
@@ -67,6 +77,7 @@ module.exports = flight.component(withAjax, withShipXHR, function() {
     this.on(document, 'newShip', this.newShip);
     this.on(document, 'increaseShipAttr', this.increaseShipAttr);
     this.on(document, 'decreaseShipAttr', this.decreaseShipAttr);
+    this.on(document, 'addWeapons', this.addWeapons);
 
     // temp
     this.on(document, 'addNewShipData', this.addCreatedShip);

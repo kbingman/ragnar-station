@@ -1,1 +1,1 @@
-{ Id: "{{ Id }}", Name: "{{ Name }}" },
+{ Id: "{{ Id }}", Name: "{{ Name }}", cost: "{{ Cost }}" },

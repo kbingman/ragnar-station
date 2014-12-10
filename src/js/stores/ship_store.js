@@ -12,19 +12,17 @@ module.exports = Flux.createStore({
   initialize: function (url) {
     var bootstrap = window.bootstrap || {};
 
-    this.set('ships', bootstrap.starships);
-    this.setCurrentShip(bootstrap.starship);
-    bootstrap.starships = null;
-    bootstrap.starship = null;
+    // this.set('ships', bootstrap.starships);
+    this.batteries = bootstrap.batteryWeapons;
+    this.pointDefense = bootstrap.pointDefenseWeapons;
+
+    // this.setCurrentShip(bootstrap.starship);
+
+    // bootstrap.starships = null;
+    // bootstrap.starship = null;
   },
 
   scheme: {
-    // currentShip: {
-    //   default: null,
-    //   calculate: function(){
-    //     return this.calculate(this.ship);
-    //   }
-    // },
     ships: {
       default: [],
       calculate: function(){
@@ -41,11 +39,16 @@ module.exports = Flux.createStore({
     'delete': 'removeShip',
     'update': 'updateShip',
     'increase': 'increaseAttr',
-    'decrease': 'decreaseAttr'
+    'decrease': 'decreaseAttr',
+    // 'increment': 'incrementAttr',
+    'addWeapons': 'addWeapons'
   },
 
   resetShips: function(data) {
     this.set('ships', data.starships);
+    this.setCurrentShip({
+      id: bootstrap.currentShip
+    });
     this.emit('change');
   },
 
@@ -101,34 +104,54 @@ module.exports = Flux.createStore({
     return ('00000000' + (Math.random() * Math.pow(16, 8) << 0).toString(16)).slice(-8);
   },
 
-  decreaseAttr: function(attr){
+  decreaseAttr: function(attr) {
     this.currentShip[attr] -= 1;
     this.currentShip = this.calculate(this.currentShip);
-    console.log(this.currentShip[attr]);
     this.emit('change');
   },
 
-  increaseAttr: function(attr){
+  increaseAttr: function(attr) {
     this.currentShip[attr] += 1;
     this.currentShip = this.calculate(this.currentShip);
-    console.log(this.currentShip[attr]);
+    this.emit('change');
+  },
+
+  addWeapons: function(options) {
+    var ship = this.currentShip;
+    var weapon = bootstrap[options.type].reduce(function(memo, w) {
+      if (w.Id == options.id) {
+        memo = w;
+      }
+      return memo;
+    }, undefined);
+
+    ship[options.type] = ship[options.type] || [];
+    ship[options.type].push({
+      id: parseInt(weapon.Id),
+      name: weapon.Name,
+      count: parseInt(options.count)
+    });
+    this.currentShip = this.calculate(this.currentShip);
     this.emit('change');
   },
 
   calculate: function(ship) {
-    if (!ship) {
-      return;
-    }
+    // if (!ship) {
+    //   return;
+    // }
 
     ship.name = ship.name.replace(/\\n/,'').trim();
     ship.uuid = ship.uuid || this.generateUID();
 
     // Cast attributes into correct type
     ship.mass = isNaN(parseInt(ship.mass)) ? 0 : parseInt(ship.mass);
+    ship.isSmallCraft = ship.mass < 100;
 
     ship.thrust = __setBoundary(ship.thrust);
     ship.ftl = __setBoundary(ship.ftl);
     ship.reactor = __setReactor(ship);
+
+    ship.hardpoints = __calculateAvailableHardpoints(ship);
 
     ship.tonnage = __calculateTonnage(ship);
     ship.crew = __calculateCrew(ship);
@@ -136,10 +159,8 @@ module.exports = Flux.createStore({
     ship.tonnage.quarters = __calculateQuarters(ship);
 
     ship.total = __calculateTotalTonnage(ship.tonnage);
+    // ship.price = __calculatePrice(ship);
     ship.remaining = ship.mass - ship.total;
-
-    console.log(__calculateAvailableHardpoints(ship));
-    console.log(ship)
 
     return ship;
   },
@@ -155,7 +176,7 @@ function __calculateAvailableHardpoints(ship) {
   // TODO: subtract primary weapon mass
   return {
     pointDefense: Math.floor(ship.mass / 100),
-    batteries: Math.floor(ship.mass / 1000)
+    batteries: Math.round(ship.mass / 1000)
   };
 }
 
@@ -164,7 +185,14 @@ function __calculateCrew(ship) {
     officers: 0,
     ratings: 0
   };
-  crew.officers += 7; // Base command crew
+  if (ship.mass <= 300) {
+    crew.officers += 2; // Base command crew
+  } else if (ship.mass > 300 && ship.mass < 5000) {
+    crew.officers += 7; // Base command crew
+  } else {
+    crew.officers += 14;
+  }
+
 
   // Basic support crew for command section
   if (ship.mass >= 20000) {
@@ -176,7 +204,7 @@ function __calculateCrew(ship) {
   // crew.officers += Math.floor(crew.command / 5);
 
   // Engineering
-  crew.engineering = Math.round((ship.tonnage.ftl + ship.tonnage.reactor + ship.tonnage.thrust)/ 100);
+  crew.engineering = Math.round((ship.tonnage.ftl + ship.tonnage.reactor + ship.tonnage.thrust) / 100);
   crew.ratings += crew.engineering;
   crew.officers += Math.floor(crew.engineering / 5); // add more for bigger ships?
 
@@ -185,11 +213,45 @@ function __calculateCrew(ship) {
   crew.ratings += crew.service;
   crew.officers += Math.floor(crew.service / 5);
 
+  // Weapons
+
   // Troops
 
   // Flight crews
 
   return crew;
+}
+
+function __calculatePrice(ship) {
+  var price = {};
+  var tonnage = ship.tonnage;
+
+  price.hull = bootstrap.configurations.reduce(function(memo, c) {
+    if (c.name == ship.configuration) {
+      memo = c.cost * 0.1 * ship.mass
+    }
+    return memo;
+  }, 0);
+  price.ftl = tonnage.ftl * 4;
+  price.thrust = tonnage.thrust * .5;
+  price.reactor = tonnage.reactor * 3;
+
+  price.quarters = tonnage.quarters * 0.125;
+
+  price.bridge = tonnage.quarters * 0.5;
+
+  if (ship.batteryWeapons) {
+    price.batteries = ship.batteryWeapons.reduce(function(memo, w) {
+      return memo += w.count * w.cost;
+    }, 0);
+  }
+  if (ship.pointDefenseWeapons) {
+    price.pointDefense = ship.pointDefenseWeapons.reduce(function(memo, w) {
+      return memo += w.count * w.cost;
+    }, 0);
+  }
+
+  return price;
 }
 
 function __calculateTonnage(ship) {
@@ -202,6 +264,17 @@ function __calculateTonnage(ship) {
   tonnage.reactor = Math.round((ship.reactor) * .01 * ship.mass);
   tonnage.fuel += Math.round((ship.reactor) * .005 * ship.mass);
   tonnage.bridge = __setBridge(ship.mass);
+
+  if (ship.batteryWeapons) {
+    tonnage.batteries = ship.batteryWeapons.reduce(function(memo, w) {
+      return memo += w.Count * 100;
+    }, 0);
+  }
+  if (ship.pointDefenseWeapons) {
+    tonnage.pointDefense = ship.pointDefenseWeapons.reduce(function(memo, w) {
+      return memo += w.Count * 1;
+    }, 0);
+  }
 
   return tonnage;
 }
@@ -216,6 +289,9 @@ function __calculateTotalTonnage(tonnage) {
 
 function __calculateQuarters(ship) {
   var tonnage = 0;
+  if (ship.mass < 100) {
+    return 0;
+  }
   tonnage += ship.crew.officers * 4;
   tonnage += ship.crew.ratings * 2;
   // tonnage += ship.troops * 2;
@@ -232,7 +308,12 @@ function __setReactor(ship) {
 }
 
 function __setBridge(mass) {
-  var bridge = mass * BRIDGE_PERCENTAGE;
+  var bridge;
+  if (mass < 100) {
+    return 4;
+  }
+
+  bridge = mass * BRIDGE_PERCENTAGE;
   bridge = Math.round(bridge > MIN_BRIDGE_MASS ? bridge : MIN_BRIDGE_MASS);
   return bridge;
 }

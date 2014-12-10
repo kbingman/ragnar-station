@@ -8,13 +8,15 @@ var component, ship;
 describe('ui_component/ship_form_ui', function(){
 
   beforeEach(function(){
+    bootstrap.configurations = [];
+
     component = (new shipForm()).initialize(element);
     // Add a bunch of mock ships
     Dispatcher.reset(mocks);
     // set current ship in the ship store
     Dispatcher.find(Dispatcher.getStore('ship').ships[0]);
     // trigger render
-    component.trigger(document, 'displayShip');
+    // component.trigger(document, 'displayShip');
   });
 
   afterEach(function(){
@@ -26,16 +28,23 @@ describe('ui_component/ship_form_ui', function(){
 
   describe('Ship form rendering', function(){
 
-    it('should render the ship name', function() {
-      var name = component.node.querySelector('#shipname').innerHTML.trim();
+    it('should render the ship name', function(next) {
+      setTimeout(function() {
+        var name = component.node.querySelector('#shipname').innerHTML;
 
-      expect(name).to.be.equal('Credibility Problem');
+        expect(name).to.be.equal('Credibility Problem');
+        next()
+      }, 1);
+
     });
 
-    it('should render the ship mass', function() {
-      var mass = component.node.querySelector('#shipmass').innerHTML.trim();
+    it('should render the ship mass', function(next) {
+      setTimeout(function() {
+        var mass = component.node.querySelector('#shipmass').innerHTML.trim();
 
-      expect(mass).to.be.equal('1000000');
+        expect(mass).to.be.equal('1000000');
+        next()
+      }, 1);
     });
 
   });

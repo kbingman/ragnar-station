@@ -1,6 +1,8 @@
 window.bootstrap = {
   configurations: [
-    {{# configurations }}{{> ships/_attributes.hogan }}{{/ configurations }}
+    {{# configurations }}
+    { id: "{{ Id }}", name: "{{ Name }}", cost: "{{ Cost }}" },
+    {{/ configurations }}
   ],
   primaryWeapons: [
     {{# primaryWeapons }}{{> ships/_attributes.hogan }}{{/ primaryWeapons }}
@@ -8,15 +10,10 @@ window.bootstrap = {
   pointDefenseWeapons: [
     {{# pointDefenseWeapons }}{{> ships/_attributes.hogan }}{{/ pointDefenseWeapons }}
   ],
-  smallcraft: [
-    {{# smallcraft }}{{> ships/_attributes.hogan }}{{/ smallcraft }}
-  ],
-  starships: [
-    {{# starships }}
-      { id: "{{ id }}", uuid: "{{ uuid }}", name: "{{ name }}", mass: "{{ mass }}", thrust: "{{ thrust }}", reactor: "{{ reactor }}", ftl: "{{ ftl }}", configuration: "{{ configuration }}" },
-    {{/ starships }}
+  batteryWeapons: [
+  {{# batteryWeapons }}{{> ships/_attributes.hogan }}{{/ batteryWeapons }}
   ],
   {{# starship }}
-    starship: { id: "{{ id }}", uuid: "{{ uuid }}", name: "{{ name }}", mass: "{{ mass }}", thrust: "{{ thrust }}", reactor: "{{ reactor }}", ftl: "{{ ftl }}", configuration: "{{ configuration }}" }
+    currentShip: "{{ id }}"
   {{/ starship }}
 }
