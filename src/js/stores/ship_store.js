@@ -17,7 +17,6 @@ module.exports = Flux.createStore({
     this.pointDefense = bootstrap.pointDefenseWeapons;
 
     // this.setCurrentShip(bootstrap.starship);
-
     // bootstrap.starships = null;
     // bootstrap.starship = null;
   },
@@ -53,15 +52,13 @@ module.exports = Flux.createStore({
   },
 
   setCurrentShip: function(data) {
-    var ship = this.find(data.id);
-
-    if (data.id == 'new') {
-      this.currentShip = {
-        id: 'new'
-      };
-      this.emit('change');
+    if (!data || !data.id) {
+      this.currentShip = {};
+      // this.emit('change');
       return;
     }
+
+    var ship = this.find(data.id);
 
     this.currentShip = ship;
     this.emit('change');
@@ -87,7 +84,7 @@ module.exports = Flux.createStore({
     var index = this.ships.indexOf(ship);
 
     this.ships.splice(index, 1);
-    this.currentShip = null;
+    this.currentShip = {};
     this.emit('change');
   },
 
@@ -118,6 +115,7 @@ module.exports = Flux.createStore({
 
   addWeapons: function(options) {
     var ship = this.currentShip;
+    var count = parseInt(options.count || 0);
     var weapon = bootstrap[options.type].reduce(function(memo, w) {
       if (w.Id == options.id) {
         memo = w;
@@ -125,11 +123,17 @@ module.exports = Flux.createStore({
       return memo;
     }, undefined);
 
+    if (!weapon) {
+      return;
+    }
+
     ship[options.type] = ship[options.type] || [];
     ship[options.type].push({
       id: parseInt(weapon.Id),
       name: weapon.Name,
-      count: parseInt(options.count)
+      count: count,
+      cost: parseFloat(weapon.cost) * count,
+      ep: parseFloat(weapon.ep) * count
     });
     this.currentShip = this.calculate(this.currentShip);
     this.emit('change');
@@ -142,6 +146,8 @@ module.exports = Flux.createStore({
 
     ship.name = ship.name.replace(/\\n/,'').trim();
     ship.uuid = ship.uuid || this.generateUID();
+
+    ship.mass = ship.mass ? ship.mass.toString().replace(/,/g,'') : 0;
 
     // Cast attributes into correct type
     ship.mass = isNaN(parseInt(ship.mass)) ? 0 : parseInt(ship.mass);
@@ -157,9 +163,12 @@ module.exports = Flux.createStore({
     ship.crew = __calculateCrew(ship);
     // Not perfect, but it will do for now
     ship.tonnage.quarters = __calculateQuarters(ship);
+    ship.ep = Math.ceil((ship.reactor) * .005 * ship.mass);
 
-    ship.total = __calculateTotalTonnage(ship.tonnage);
-    // ship.price = __calculatePrice(ship);
+    ship.prices = __calculatePrice(ship);
+
+    ship.total = __calculateTotal(ship.tonnage);
+    ship.price = __calculateTotal(ship.prices);
     ship.remaining = ship.mass - ship.total;
 
     return ship;
@@ -232,24 +241,25 @@ function __calculatePrice(ship) {
     }
     return memo;
   }, 0);
+
   price.ftl = tonnage.ftl * 4;
   price.thrust = tonnage.thrust * .5;
   price.reactor = tonnage.reactor * 3;
-
   price.quarters = tonnage.quarters * 0.125;
-
   price.bridge = tonnage.quarters * 0.5;
 
   if (ship.batteryWeapons) {
     price.batteries = ship.batteryWeapons.reduce(function(memo, w) {
-      return memo += w.count * w.cost;
+      return memo += w.cost;
     }, 0);
   }
-  if (ship.pointDefenseWeapons) {
+  if (ship.pointDefenseWeapons && ship.pointDefenseWeapons.length) {
     price.pointDefense = ship.pointDefenseWeapons.reduce(function(memo, w) {
-      return memo += w.count * w.cost;
+      console.log(memo, w);
+      return memo += w.cost;
     }, 0);
   }
+
 
   return price;
 }
@@ -260,29 +270,29 @@ function __calculateTonnage(ship) {
   };
   tonnage.ftl = Math.round(presets.ftl[ship.ftl] * .01 * ship.mass);
   tonnage.fuel += Math.round(ship.ftl * .1 * ship.mass);
-  tonnage.thrust = Math.round((presets.thrust[ship.thrust]) * .01 * ship.mass);
-  tonnage.reactor = Math.round((ship.reactor) * .01 * ship.mass);
-  tonnage.fuel += Math.round((ship.reactor) * .005 * ship.mass);
+  tonnage.thrust = Math.round((presets.thrust[ship.thrust]) * .01 * ship.mass * 10) / 10;
+  tonnage.reactor = Math.round((ship.reactor) * .01 * ship.mass * 10) / 10;
+  tonnage.fuel += Math.round((ship.reactor) * .005 * ship.mass * 10) / 10;
   tonnage.bridge = __setBridge(ship.mass);
 
   if (ship.batteryWeapons) {
     tonnage.batteries = ship.batteryWeapons.reduce(function(memo, w) {
-      return memo += w.Count * 100;
+      return memo += w.count * 100;
     }, 0);
   }
   if (ship.pointDefenseWeapons) {
     tonnage.pointDefense = ship.pointDefenseWeapons.reduce(function(memo, w) {
-      return memo += w.Count * 1;
+      return memo += w.count * 1;
     }, 0);
   }
 
   return tonnage;
 }
 
-function __calculateTotalTonnage(tonnage) {
+function __calculateTotal(parts) {
   var total = 0;
-  for (var key in tonnage) {
-    total += tonnage[key];
+  for (var key in parts) {
+    total += parts[key];
   }
   return total;
 }

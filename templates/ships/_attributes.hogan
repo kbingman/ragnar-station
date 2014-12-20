@@ -1,1 +1,1 @@
-{ Id: "{{ Id }}", Name: "{{ Name }}", cost: "{{ Cost }}" },
+{ Id: "{{ Id }}", Name: "{{ Name }}", cost: "{{ Cost }}", ep: "{{ EnergyPoints }}" },

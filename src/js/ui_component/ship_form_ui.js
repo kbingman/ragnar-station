@@ -1,13 +1,12 @@
 var flight = require('../lib/flight');
-var withFormUtils = require('../mixin/with_form_utils');
+// var withFormUtils = require('../mixin/with_form_utils');
+var withHogan = require('../mixin/with_hogan');
 var template = require('../../../templates/ships/_form.hogan');
-var ShipDispatcher = require('../dispatcher');
+var Dispatcher = require('../dispatcher');
 var primaryWeapons = require('../utils/primary_weapons');
 
-module.exports = flight.component(withFormUtils, function() {
+module.exports = flight.component(withHogan, function() {
   this.attributes({
-    'createStarship': '#createStarship',
-    'starshipName': '#starshipName',
     'inputFields': '[contenteditable]',
     'increaseButton': '[data-up]',
     'decreaseButton': '[data-down]',
@@ -20,7 +19,7 @@ module.exports = flight.component(withFormUtils, function() {
   this.updateShip = function(e, data) {
     e.preventDefault();
     var attr = e.target.getAttribute('name');
-    var ship = ShipDispatcher.getStore('ship').currentShip;
+    var ship = Dispatcher.getStore('ship').currentShip;
 
     try {
       var sel = window.getSelection();
@@ -35,13 +34,10 @@ module.exports = flight.component(withFormUtils, function() {
     this.trigger('updateShip', ship);
   };
 
-  // this.setPrimaryWeapon = function(e) {
-  //   console.log(primaryWeapons);
-  // };
-  //
-  // this.setBatteryWeapons = function(e) {
-  //   console.log(primaryWeapons);
-  // };
+  this.clearFocus = function(e) {
+    this.attr.focused = undefined;
+    console.log('blur');
+  };
 
   this.delegateEvents = function(e) {
     for (var key in e.target.dataset) {
@@ -79,13 +75,54 @@ module.exports = flight.component(withFormUtils, function() {
       id: id,
       count: count,
       type: e.target.dataset.add
-    })
+    });
+    this.attr.focused = undefined;
   };
 
-  this.displayShip = function(e) {
-    var starship = ShipDispatcher.getStore('ship').currentShip;
+  // move to store, should be dynamic
+  this.batteries = function(starship) {
+    var factor = 1;
+    var array = [];
+    if (starship.mass >= 10000 && starship.mass <= 100000) {
+      factor = 10;
+    } else if (starship.mass > 100000) {
+      factor = 100;
+    }
 
-    this.node.innerHTML = template.render({
+    var limit = Math.round(starship.hardpoints.batteries / factor);
+
+    for (var i = 0; i < limit; i++) {
+      array.push((i + 1) * factor);
+    }
+    return array;
+  };
+
+  // move to store, should be dynamic
+  this.pdt = function(starship) {
+    var factor = 1;
+    var array = [];
+    if (starship.mass >= 1000 && starship.mass < 10000) {
+      factor = 10;
+    } else if (starship.mass >= 10000 && starship.mass <= 100000) {
+      factor = 100;
+    } else if (starship.mass > 100000) {
+      factor = 1000;
+    }
+
+    var limit = Math.round(starship.hardpoints.pointDefense / factor);
+
+    for (var i = 0; i < limit; i++) {
+      array.push((i + 1) * factor);
+    }
+    return array;
+  }
+
+  this.displayShip = function(e) {
+    var starship = Dispatcher.getStore('ship').currentShip;
+
+    console.log(starship)
+
+    var context = {
       starship: starship,
       smallcraft: bootstrap.smallcraft,
       availableBatteryWeapons: bootstrap.batteryWeapons,
@@ -99,42 +136,12 @@ module.exports = flight.component(withFormUtils, function() {
         }
         return c;
       }),
-      pdt: (function() {
-        var factor = 1;
-        var array = [];
-        if (starship.mass >= 1000 && starship.mass < 10000) {
-          factor = 10;
-        } else if (starship.mass >= 10000 && starship.mass <= 100000) {
-          factor = 100;
-        } else if (starship.mass > 100000) {
-          factor = 1000;
-        }
+      pdt: this.pdt(starship),
+      batteries: this.batteries(starship),
+      armor: [1,2,3,4,5,6,7,8,9,10]
+    };
 
-        var limit = Math.round(starship.hardpoints.pointDefense / factor);
-
-        for (var i = 0; i < limit; i++) {
-          array.push((i + 1) * factor);
-        }
-        return array;
-      })(),
-      batteries: (function() {
-        var factor = 1;
-        var array = [];
-        if (starship.mass >= 10000 && starship.mass <= 100000) {
-          factor = 10;
-        } else if (starship.mass > 100000) {
-          factor = 100;
-        }
-
-        var limit = Math.round(starship.hardpoints.batteries / factor);
-
-        for (var i = 0; i < limit; i++) {
-          array.push((i + 1) * factor);
-        }
-        return array;
-      })(),
-    });
-
+    this.node.innerHTML = this.render(template, context);
     this.setFocus();
   };
 
@@ -143,7 +150,7 @@ module.exports = flight.component(withFormUtils, function() {
       return;
     }
 
-    var ship = ShipDispatcher.getStore('ship').currentShip;
+    var ship = Dispatcher.getStore('ship').currentShip;
     var node = this.node.querySelector('[name="' + this.attr.focused + '"]');
     var range = document.createRange();
     var sel = window.getSelection();
@@ -153,16 +160,12 @@ module.exports = flight.component(withFormUtils, function() {
     range.setStart(node.firstChild, start);
     sel.removeAllRanges();
     sel.addRange(range);
-
-    this.attr.focused = undefined;
-    this.attr.start = undefined;
   }
 
   this.updateURL = function() {
-    var starship = ShipDispatcher.getStore('ship').currentShip;
+    var starship = Dispatcher.getStore('ship').currentShip;
     var currentID = document.location.pathname.split('/')[2];
 
-    this.attr.id = starship.id;
 
     if (starship.id == currentID || starship.id == undefined) {
       return;
@@ -172,8 +175,7 @@ module.exports = flight.component(withFormUtils, function() {
   };
 
   this.displayNewShip = function() {
-    this.attr.id = undefined;
-    this.node.innerHTML = template.render({
+    var context = {
       starship: {
         mass: 0,
         ftl: 0,
@@ -183,26 +185,28 @@ module.exports = flight.component(withFormUtils, function() {
       pointDefenseWeapons: bootstrap.pointDefenseWeapons,
       primaryWeapons: bootstrap.primaryWeapons,
       configurations: bootstrap.configurations
-    });
+    };
+
+    this.node.innerHTML = this.render(template, context);
     history.pushState({ starship: 'new' }, 'new', '/ships/new');
   };
 
   this.after('initialize', function() {
-    this.attr.id = document.location.pathname.split('/')[2];
 
     this.on('keyup', {
-      'inputFields': flight.utils.debounce(this.updateShip, 700)
+      'inputFields': flight.utils.debounce(this.updateShip, 0)
+    });
+    this.on('blur', {
+      'inputFields': this.clearFocus
     });
     this.on('click', this.delegateEvents);
     this.on('change', {
-      'configuration': this.updateShip,
-      'primaryWeapon': this.setPrimaryWeapon,
-      'batteries': this.setBatteryWeapons
+      'configuration': this.updateShip
     });
 
     this.on(document, 'showNewShip', this.displayNewShip);
-    // this.on(document, 'displayShip', this.displayShip);
-    ShipDispatcher.on('change:all', this.updateURL.bind(this));
-    ShipDispatcher.on('change:all', this.displayShip.bind(this));
+
+    Dispatcher.on('change:all', this.updateURL.bind(this));
+    Dispatcher.on('change:all', this.displayShip.bind(this));
   });
 });

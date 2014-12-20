@@ -42,7 +42,7 @@ describe('ui_component/ship_form_ui', function(){
       setTimeout(function() {
         var mass = component.node.querySelector('#shipmass').innerHTML.trim();
 
-        expect(mass).to.be.equal('1000000');
+        expect(mass).to.be.equal('1,000,000');
         next()
       }, 1);
     });

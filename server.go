@@ -22,9 +22,8 @@ var (
 type Weapon struct {
   Id int `json:"id"`
   Name string `json:"name"`
-  Cost int `json:"cost"`
-  // CostFactor int
-  // EnergyRequired int
+  Cost float32 `json:"cost"`
+  EnergyPoints float32 `json:"energyPoints"`
   // RequiredTechLevel int
 }
 
@@ -32,7 +31,8 @@ type Battery struct {
   Id int `json:"id"`
   Name string `json:"name"`
   Count int `json:"count"`
-  Cost int `json:"cost"`
+  Cost float32  `json:"cost"`
+  // EnergyPoints int `json:"energyPoints"`
 }
 
 type Configuration struct {
@@ -49,7 +49,9 @@ type Starship struct {
   Configuration string `json:"configuration"`
   Mass int64 `json:"mass"`
   Thrust int64 `json:"thrust"`
+  Ep float32 `json:"ep"`
   Reactor int64 `json:"reactor"`
+  Price float32 `json:"price"`
   Ftl int64 `json:"ftl"`
   PrimaryWeapon Weapon `json:"primaryWeapon"`
   PointDefenseWeapons []Battery `json:"pointDefenseWeapons"`
@@ -200,22 +202,24 @@ func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Para
   }
 
   primaryWeapons := []*Weapon{
-    {1, "Railgun", 1},
-    {2, "Mass Driver", 1},
-    {3, "Ion Gun", 1},
+    {1, "Railgun", 1, 1},
+    {2, "Mass Driver", 1, 1},
+    {3, "Ion Gun", 1, 1},
   }
 
   batteryWeapons := []*Weapon{
-    {1, "Missle Tubes", 1},
-    {2, "Brilliant Pebble Launcher", 1},
-    {3, "Railgun", 1},
-    {4, "Gauss Gun", 1},
+    {1, "Missle Tubes", 20, 0},
+    {2, "Brilliant Pebble Launcher", 30, 0},
+    {3, "Railgun", 40, 40},
+    {4, "Coilgun", 50, 50},
   }
 
   pointDefenseWeapons := []*Weapon{
-    {2, "Projectile", 1},
-    {3, "Pulse Laser", 1},
-    {4, "Railgun", 1},
+    {1, "Missle", 0.75, 0},
+    {2, "Projectile", 0.5, 0},
+    {3, "Pulse Laser", 1.0, 1},
+    {4, "Railgun", 2.0, 2},
+    {5, "Coilgun", 4.0, 3},
   }
 
   context := map[string]interface{}{

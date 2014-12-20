@@ -8,7 +8,7 @@ module.exports = function() {
   });
 
   this.getAllShips = function() {
-    this.request({
+    return this.request({
       'xhr': {
         'path': 'ships'
       },
@@ -20,7 +20,7 @@ module.exports = function() {
   };
 
   this.createShip = function(e, data) {
-    this.request({
+    return this.request({
       'xhr': {
         'path': 'ships',
         'method': 'post',
@@ -29,14 +29,13 @@ module.exports = function() {
         }
       },
       'events': {
-        'done': 'addNewShipData',
         'fail': 'ajaxError'
       }
     });
   };
 
   this.putShip = function(e, data) {
-    this.request({
+    return this.request({
       'xhr': {
         'path': 'ships/' + data.id,
         'method': 'put',
@@ -45,20 +44,18 @@ module.exports = function() {
         }
       },
       'events': {
-        'done': 'updateShipData',
         'fail': 'ajaxError'
       }
     });
   }
 
   this.deleteShip = function(e, data) {
-    this.request({
+    return this.request({
       'xhr': {
         'path': 'ships/' + data.id,
         'method': 'delete'
       },
       'events': {
-        'done': 'removeShipData',
         'fail': 'ajaxError'
       }
     });

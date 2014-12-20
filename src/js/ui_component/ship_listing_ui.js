@@ -1,12 +1,12 @@
 var flight = require('../lib/flight');
 var template = require('../../../templates/ships/_ship.hogan');
-var ShipDispatcher = require('../dispatcher');
+var Dispatcher = require('../dispatcher');
 
 module.exports = flight.component(function() {
 
   this.displayShipInfo = function(e) {
     this.node.innerHTML = template.render({
-      starships: ShipDispatcher.getStore('ship').ships
+      starships: Dispatcher.getStore('ship').ships
     });
   };
 
@@ -39,7 +39,7 @@ module.exports = flight.component(function() {
   }
 
   this.after('initialize', function() {
-    ShipDispatcher.on('change:all', this.displayShipInfo.bind(this));
+    Dispatcher.on('change:all', this.displayShipInfo.bind(this));
     this.on('click', this.delegateEvents);
   });
 

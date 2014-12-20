@@ -18,14 +18,15 @@
             id="shipmass"
             contenteditable="true"
             placeholder="mass">
-          {{ mass }}
+            {{# round }}{{ mass }}{{/ round }}
         </span>m
 
         remaining<span type="text"
           placeholder="mass">
-          {{ remaining }}
+          {{# format }}{{ remaining }}{{/ format }}
         </span>
       </h3>
+      <p>Price: MCr {{# format }}{{ price }}{{/ format }}</p>
       <span class="r-error-message"></span>
     </div>
 
@@ -37,6 +38,18 @@
             {{ name }}
           </option>
         {{/ configurations }}
+      </select>
+      <span class="r-error-message"></span>
+    </div>
+
+    <div class="r-field">
+      <label for="shiparmor">Armor</label>
+      <select name="armor" id="shiparmor">
+        {{# armor }}
+        <option {{# selected }}selected {{/ selected }}value="{{ name }}">
+          {{ . }}
+        </option>
+        {{/ armor }}
       </select>
       <span class="r-error-message"></span>
     </div>
@@ -65,7 +78,7 @@
       <span class="r-error-message"></span>
     </div>
 
-    <div class="r-field">
+    <!-- <div class="r-field">
       <label for="primaryWeapon">Spinal Mounted Primary Weapon</label>
       <select id="primaryWeapon">
         <option value="">...</option>
@@ -78,13 +91,13 @@
         <option value="a">A</option>
       </select>
       <span class="r-error-message"></span>
-    </div>
+    </div> -->
     <div class="r-field">
     {{# batteryWeapons }}
       <div>{{ name }} &ndash; {{ count }}</div>
     {{/ batteryWeapons }}
     {{# pointDefenseWeapons }}
-    <div>{{ name }} &ndash; {{ count }}</div>
+      <div>{{ name }} &ndash; {{ count }}</div>
     {{/ pointDefenseWeapons }}
     </div>
   {{/ starship }}
@@ -124,7 +137,7 @@
     <span class="r-error-message"></span>
   </div>
 
-  <div class="r-field">
+  <!-- <div class="r-field">
     <label for="smallcraft">Small Craft</label>
     <select id="smallcraft">
       <option value="">...</option>
@@ -134,5 +147,5 @@
     </select>
     <button data="">Add</button>
     <span class="r-error-message"></span>
-  </div>
+  </div> -->
 </form>
