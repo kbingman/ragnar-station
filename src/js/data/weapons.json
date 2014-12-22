@@ -1,0 +1,38 @@
+{
+  "primaryWeapons": [
+    {
+      "id": "1",
+      "name": "Railgun",
+      "cost": 100,
+      "ep": 2
+    },{
+      "id": "1",
+      "name": "Railgun",
+      "cost": 100,
+      "ep": 2
+    },{
+      "id": "1",
+      "name": "Railgun",
+      "cost": 100,
+      "ep": 2
+    }
+  ],
+  "batteriesWeapons": [
+    {
+      "id": "1",
+      "name": "Railgun",
+      "cost": 100,
+      "ep": 2
+    },{
+      "id": "1",
+      "name": "Railgun",
+      "cost": 100,
+      "ep": 2
+    },{
+      "id": "1",
+      "name": "Railgun",
+      "cost": 100,
+      "ep": 2
+    }
+  ]
+}

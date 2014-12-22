@@ -16,17 +16,25 @@ module.exports = flight.component(withAjax, withShipXHR, function() {
   }
 
   this.removeShip = function(e, data) {
-    Dispatcher.delete(data);
-    this.deleteShip(e, data);
+    this.deleteShip(e, data).then(function() {
+      Dispatcher.delete(data);
+    });
     this.trigger(document, 'showNewShip');
   };
 
   this.updateShip = function(e, data) {
-    Dispatcher.update(data);
-    this.save(Dispatcher.getStore('ship').currentShip);
+    Dispatcher.dispatch('update', data).then(_saveValidShip.bind(this));
+
+    function _saveValidShip() {
+      var ship = Dispatcher.getStore('ship').currentShip;
+      this.save(ship);
+    }
   };
 
   this.save = flight.utils.throttle(function(ship){
+    if (!ship.isValid) {
+      return;
+    }
     if (ship.id) {
       this.putShip(null, ship).then(function(r) {
         Dispatcher.update(data.starship);
@@ -47,18 +55,13 @@ module.exports = flight.component(withAjax, withShipXHR, function() {
     Dispatcher.reset(data);
   };
 
-  this.increaseShipAttr = function(e, data) {
-    Dispatcher.increase(data.attr);
-    this.save(Dispatcher.getStore('ship').currentShip);
-  };
-
-  this.decreaseShipAttr = function(e, data) {
-    Dispatcher.decrease(data.attr);
-    this.save(Dispatcher.getStore('ship').currentShip);
-  };
-
   this.addWeapons = function(e, data) {
     Dispatcher.addWeapons(data);
+    this.save(Dispatcher.getStore('ship').currentShip);
+  };
+
+  this.removeWeapons = function(e, data) {
+    Dispatcher.removeWeapons(data);
     this.save(Dispatcher.getStore('ship').currentShip);
   };
 
@@ -75,9 +78,8 @@ module.exports = flight.component(withAjax, withShipXHR, function() {
     this.on(document, 'deleteShip', this.removeShip);
     this.on(document, 'editShip', this.editShip);
     this.on(document, 'newShip', this.newShip);
-    this.on(document, 'increaseShipAttr', this.increaseShipAttr);
-    this.on(document, 'decreaseShipAttr', this.decreaseShipAttr);
     this.on(document, 'addWeapons', this.addWeapons);
+    this.on(document, 'removeWeapons', this.removeWeapons);
 
   });
 

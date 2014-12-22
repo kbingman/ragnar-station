@@ -23,7 +23,7 @@ type Weapon struct {
   Id int `json:"id"`
   Name string `json:"name"`
   Cost float32 `json:"cost"`
-  EnergyPoints float32 `json:"energyPoints"`
+  Ep float32 `json:"ep"`
   // RequiredTechLevel int
 }
 
@@ -32,6 +32,7 @@ type Battery struct {
   Name string `json:"name"`
   Count int `json:"count"`
   Cost float32  `json:"cost"`
+  Ep float32 `json:"ep"`
   // EnergyPoints int `json:"energyPoints"`
 }
 
@@ -47,6 +48,7 @@ type Starship struct {
   Uuid string `json:"uuid"`
   Name string `json:"name"`
   Configuration string `json:"configuration"`
+  Armor float32 `json:"armor"`
   Mass int64 `json:"mass"`
   Thrust int64 `json:"thrust"`
   Ep float32 `json:"ep"`

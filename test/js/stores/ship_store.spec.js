@@ -95,6 +95,14 @@ describe('stores/ship_stores', function(){
     });
   });
 
+  describe('Ship validation', function() {
+    it('should return true for a valid ship', function() {
+      var ship = Dispatcher.getStore('ship').find('545c565f7c6e192dc6000003');
+
+      expect(ship.isValid).to.equal(true);
+    });
+  });
+
   describe('Ship Store events', function() {
 
     it('should find ships');

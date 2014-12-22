@@ -37,10 +37,8 @@ module.exports = Flux.createStore({
     'find': 'setCurrentShip',
     'delete': 'removeShip',
     'update': 'updateShip',
-    'increase': 'increaseAttr',
-    'decrease': 'decreaseAttr',
-    // 'increment': 'incrementAttr',
-    'addWeapons': 'addWeapons'
+    'addWeapons': 'addWeapons',
+    'removeWeapons': 'removeWeapons'
   },
 
   resetShips: function(data) {
@@ -54,7 +52,6 @@ module.exports = Flux.createStore({
   setCurrentShip: function(data) {
     if (!data || !data.id) {
       this.currentShip = {};
-      // this.emit('change');
       return;
     }
 
@@ -65,16 +62,29 @@ module.exports = Flux.createStore({
   },
 
   updateShip: function(data) {
-    var id = data.uuid || data.id;
-    var ship = this.find(id);
-    var index = this.ships.indexOf(ship);
+    // var id = data.uuid || data.id;
+    // var ship = this.find(id);
+    // var index = this.ships.indexOf(ship);
+    var ship = clone(this.currentShip);
 
-    this.currentShip = this.calculate(data);
-    if (this.ships[index]) {
-      this.ships[index] = this.currentShip;
-    } else {
-      this.ships.push(this.currentShip)
+    Object.keys(data).forEach(function(attr) {
+      ship[attr] = data[attr];
+    });
+
+    var ship = this.calculate(ship);
+
+    if (!ship.isValid) {
+      this.emit('rollback');
+      alert('hey')
+      return;
     }
+    this.currentShip = ship;
+
+    // if (this.ships[index]) {
+    //   this.ships[index] = this.currentShip;
+    // } else {
+    //   this.ships.push(this.currentShip)
+    // }
 
     this.emit('change');
   },
@@ -98,19 +108,26 @@ module.exports = Flux.createStore({
    * Util method. Generates a unique ID
    */
   generateUID: function() {
-    return ('00000000' + (Math.random() * Math.pow(16, 8) << 0).toString(16)).slice(-8);
+    return ('00000000' + (Math.random() * Math.pow(16, 8) << 0)
+      .toString(16))
+      .slice(-8)
+      .replace(/-/,0);
   },
 
-  decreaseAttr: function(attr) {
-    this.currentShip[attr] -= 1;
-    this.currentShip = this.calculate(this.currentShip);
-    this.emit('change');
-  },
+  removeWeapons: function(data) {
+    var ship = this.currentShip;
+    var weapons = ship[data.type];
+    var index = weapons.reduce(function(memo, w, i) {
+      if (w.id == data.id) {
+        memo = i;
+      }
+      return memo;
+    }, undefined);
 
-  increaseAttr: function(attr) {
-    this.currentShip[attr] += 1;
-    this.currentShip = this.calculate(this.currentShip);
-    this.emit('change');
+    if (index != undefined){
+      weapons.splice(index, 1);
+      this.emit('change');
+    }
   },
 
   addWeapons: function(options) {
@@ -140,13 +157,12 @@ module.exports = Flux.createStore({
   },
 
   calculate: function(ship) {
-    // if (!ship) {
-    //   return;
-    // }
 
     ship.name = ship.name.replace(/\\n/,'').trim();
     ship.uuid = ship.uuid || this.generateUID();
+    ship.armor = ship.armor ? parseInt(ship.armor) : 0;
 
+    // Strip commas
     ship.mass = ship.mass ? ship.mass.toString().replace(/,/g,'') : 0;
 
     // Cast attributes into correct type
@@ -156,6 +172,8 @@ module.exports = Flux.createStore({
     ship.thrust = __setBoundary(ship.thrust);
     ship.ftl = __setBoundary(ship.ftl);
     ship.reactor = __setReactor(ship);
+    ship.ep = Math.ceil((ship.reactor) * .005 * ship.mass);
+    ship.power = __calculatePowerConsumption(ship);
 
     ship.hardpoints = __calculateAvailableHardpoints(ship);
 
@@ -163,13 +181,14 @@ module.exports = Flux.createStore({
     ship.crew = __calculateCrew(ship);
     // Not perfect, but it will do for now
     ship.tonnage.quarters = __calculateQuarters(ship);
-    ship.ep = Math.ceil((ship.reactor) * .005 * ship.mass);
 
     ship.prices = __calculatePrice(ship);
 
     ship.total = __calculateTotal(ship.tonnage);
     ship.price = __calculateTotal(ship.prices);
     ship.remaining = ship.mass - ship.total;
+
+    ship.isValid = __checkValidity(ship);
 
     return ship;
   },
@@ -179,6 +198,22 @@ module.exports = Flux.createStore({
 function __calculatePrice(ship) {
   var price = 0;
   return price;
+}
+
+function __checkValidity(ship) {
+  var valid = true;
+
+  // Components fit
+  if (ship.remaining < 0) {
+    return false;
+  }
+
+  // Power requirements are met
+  if (ship.ep - ship.power < 0) {
+    return false;
+  }
+
+  return valid;
 }
 
 function __calculateAvailableHardpoints(ship) {
@@ -231,6 +266,23 @@ function __calculateCrew(ship) {
   return crew;
 }
 
+function __calculatePowerConsumption(ship) {
+  var weapons = 0;
+  if (ship.batteryWeapons) {
+    ship.batteryWeapons.forEach(function(w) {
+      weapons += w.ep;
+    });
+  }
+  if (ship.pointDefenseWeapons) {
+    ship.pointDefenseWeapons.forEach(function(w) {
+      weapons += w.ep;
+    });
+  }
+  return {
+    weapons: weapons
+  }
+}
+
 function __calculatePrice(ship) {
   var price = {};
   var tonnage = ship.tonnage;
@@ -241,6 +293,7 @@ function __calculatePrice(ship) {
     }
     return memo;
   }, 0);
+  price.armor = tonnage.armor * (0.3 + 0.1);
 
   price.ftl = tonnage.ftl * 4;
   price.thrust = tonnage.thrust * .5;
@@ -255,7 +308,6 @@ function __calculatePrice(ship) {
   }
   if (ship.pointDefenseWeapons && ship.pointDefenseWeapons.length) {
     price.pointDefense = ship.pointDefenseWeapons.reduce(function(memo, w) {
-      console.log(memo, w);
       return memo += w.cost;
     }, 0);
   }
@@ -273,7 +325,8 @@ function __calculateTonnage(ship) {
   tonnage.thrust = Math.round((presets.thrust[ship.thrust]) * .01 * ship.mass * 10) / 10;
   tonnage.reactor = Math.round((ship.reactor) * .01 * ship.mass * 10) / 10;
   tonnage.fuel += Math.round((ship.reactor) * .005 * ship.mass * 10) / 10;
-  tonnage.bridge = __setBridge(ship.mass);
+  tonnage.bridge = __setBridge(ship);
+  tonnage.armor = Math.round((ship.armor + 1) * .01 * ship.mass * 10) / 10;
 
   if (ship.batteryWeapons) {
     tonnage.batteries = ship.batteryWeapons.reduce(function(memo, w) {
@@ -317,13 +370,13 @@ function __setReactor(ship) {
   return reactor;
 }
 
-function __setBridge(mass) {
+function __setBridge(ship) {
   var bridge;
-  if (mass < 100) {
+  if (ship.mass < 100) {
     return 4;
   }
 
-  bridge = mass * BRIDGE_PERCENTAGE;
+  bridge = ship.mass * BRIDGE_PERCENTAGE;
   bridge = Math.round(bridge > MIN_BRIDGE_MASS ? bridge : MIN_BRIDGE_MASS);
   return bridge;
 }
@@ -334,4 +387,18 @@ function __setBoundary(attr, limit) {
   attr = attr < 0 ? 0 : attr;
   attr = attr > limit ? limit : attr;
   return attr;
+}
+
+function clone(obj) {
+  if(obj == null || typeof(obj) != 'object') {
+    return obj;
+  }
+  var temp = obj.constructor(); // changed
+
+  for(var key in obj) {
+    if(obj.hasOwnProperty(key)) {
+      temp[key] = clone(obj[key]);
+    }
+  }
+  return temp;
 }

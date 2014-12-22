@@ -4,7 +4,7 @@
     <a href="/ships/{{ id }}" class="r-action r-ship-name" data-edit="{{ id }}">
       {{ name }}
     </a>
-    {{ mass }}m {{ configuration }}
-    <a class="r-delete r-action" data-delete="{{ id }}">X</a>
+    {{# round }}{{ mass }}{{/ round }}m {{ configuration }}
+    <button class="r-delete r-action" data-delete="{{ id }}">Remove</button>
   </div>
 {{/ starships }}

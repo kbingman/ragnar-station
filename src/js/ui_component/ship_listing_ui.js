@@ -1,11 +1,12 @@
 var flight = require('../lib/flight');
+var withHogan = require('../mixin/with_hogan');
 var template = require('../../../templates/ships/_ship.hogan');
 var Dispatcher = require('../dispatcher');
 
-module.exports = flight.component(function() {
+module.exports = flight.component(withHogan, function() {
 
   this.displayShipInfo = function(e) {
-    this.node.innerHTML = template.render({
+    this.node.innerHTML = this.render(template, {
       starships: Dispatcher.getStore('ship').ships
     });
   };

@@ -13,7 +13,9 @@ module.exports = flight.component(withHogan, function() {
     'configuration': '[name="configuration"]',
     'primaryWeapon': '#primaryWeapon',
     'batteries': '#batteryWeapons',
-    'addWeapons': '[data-add]'
+    'addWeapons': '[data-addweapon]',
+    'removeWeapons': '[data-removeweapon]',
+    'armor': '[name="armor"]',
   });
 
   this.updateShip = function(e, data) {
@@ -49,23 +51,25 @@ module.exports = flight.component(withHogan, function() {
 
   this.up = function(e, data) {
     e.preventDefault();
+    var data = {};
+    var ship = Dispatcher.getStore('ship').currentShip;
     var attr = e.target.dataset.up;
+    data[attr] = ship[attr] + 1;
 
-    this.trigger('increaseShipAttr', {
-      attr: attr
-    });
+    this.trigger('updateShip', data);
   };
 
   this.down = function(e, data) {
     e.preventDefault();
+    var data = {};
+    var ship = Dispatcher.getStore('ship').currentShip;
     var attr = e.target.dataset.down;
+    data[attr] = ship[attr] - 1;
 
-    this.trigger('decreaseShipAttr', {
-      attr: attr
-    });
+    this.trigger('updateShip', data);
   };
 
-  this.add = function(e) {
+  this.addweapon = function(e) {
     e.preventDefault();
     var parent = e.target.parentNode;
     var id = parent.querySelector('[data-weapon]').value;
@@ -74,9 +78,19 @@ module.exports = flight.component(withHogan, function() {
     this.trigger('addWeapons', {
       id: id,
       count: count,
-      type: e.target.dataset.add
+      type: e.target.dataset.addweapon
     });
-    this.attr.focused = undefined;
+  };
+
+  this.removeweapon = function(e) {
+    e.preventDefault();
+    var id = e.target.dataset.removeweapon;
+    var type = e.target.dataset.type;
+
+    this.trigger('removeWeapons', {
+      id: id,
+      type: type
+    });
   };
 
   // move to store, should be dynamic
@@ -115,7 +129,18 @@ module.exports = flight.component(withHogan, function() {
       array.push((i + 1) * factor);
     }
     return array;
-  }
+  };
+
+  this.armor = function(starship) {
+    var ratings = [0,1,2,3,4,5,6,7,8,9,10];
+
+    return ratings.map(function(r) {
+        return {
+          value: r,
+          selected: r == starship.armor ? 'selected' : ''
+        }
+    });
+  };
 
   this.displayShip = function(e) {
     var starship = Dispatcher.getStore('ship').currentShip;
@@ -138,7 +163,7 @@ module.exports = flight.component(withHogan, function() {
       }),
       pdt: this.pdt(starship),
       batteries: this.batteries(starship),
-      armor: [1,2,3,4,5,6,7,8,9,10]
+      armorRatings: this.armor(starship)
     };
 
     this.node.innerHTML = this.render(template, context);
@@ -201,12 +226,14 @@ module.exports = flight.component(withHogan, function() {
     });
     this.on('click', this.delegateEvents);
     this.on('change', {
-      'configuration': this.updateShip
+      'configuration': this.updateShip,
+      'armor': this.updateShip
     });
 
     this.on(document, 'showNewShip', this.displayNewShip);
 
     Dispatcher.on('change:all', this.updateURL.bind(this));
+    Dispatcher.on('rollback:all', function() { alert('hey'); });
     Dispatcher.on('change:all', this.displayShip.bind(this));
   });
 });

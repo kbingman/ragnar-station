@@ -45,11 +45,11 @@
     <div class="r-field">
       <label for="shiparmor">Armor</label>
       <select name="armor" id="shiparmor">
-        {{# armor }}
-        <option {{# selected }}selected {{/ selected }}value="{{ name }}">
-          {{ . }}
+        {{# armorRatings }}
+        <option {{# selected }}selected {{/ selected }}value="{{ value }}">
+          {{ value }}
         </option>
-        {{/ armor }}
+        {{/ armorRatings }}
       </select>
       <span class="r-error-message"></span>
     </div>
@@ -94,13 +94,24 @@
     </div> -->
     <div class="r-field">
     {{# batteryWeapons }}
-      <div>{{ name }} &ndash; {{ count }}</div>
+      <div>
+        Batteries: {{ name }} &ndash; {{ count }}
+        <button data-type="batteryWeapons" data-removeweapon="{{ id }}">
+          Remove
+        </button>
+      </div>
     {{/ batteryWeapons }}
     {{# pointDefenseWeapons }}
-      <div>{{ name }} &ndash; {{ count }}</div>
+      <div>
+        Point Defense Weapons: {{ name }} &ndash; {{ count }}
+        <button data-type="pointDefenseWeapons" data-removeweapon="{{ id }}">
+          Remove
+        </button>
+      </div>
     {{/ pointDefenseWeapons }}
     </div>
   {{/ starship }}
+
   <div class="r-field">
     <label for="batteryWeapons">Battery Weapons</label>
     <select data-weapon id="batteryWeapons">
@@ -115,7 +126,7 @@
       <option value="{{ . }}">{{ . }}</option>
       {{/ batteries }}
     </select>
-    <button data-add="batteryWeapons" id="addBattterButton">Add</button>
+    <button data-addweapon="batteryWeapons" id="addBattterButton">Add</button>
     <span class="r-error-message"></span>
   </div>
 
@@ -133,7 +144,7 @@
       <option value="{{ . }}">{{ . }}</option>
       {{/ pdt }}
     </select>
-    <button data-add="pointDefenseWeapons" id="addPointDefenseButton">Add</button>
+    <button data-addweapon="pointDefenseWeapons" id="addPointDefenseButton">Add</button>
     <span class="r-error-message"></span>
   </div>
 
