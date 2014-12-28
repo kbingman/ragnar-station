@@ -14,5 +14,8 @@
   <body>
     {{{content}}}
   </body>
+  <script>
+    {{> _bootstrap.hogan }}
+  </script>
   <script src='/js/bundle.js'></script>
 </html>

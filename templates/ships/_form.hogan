@@ -12,20 +12,25 @@
     </div>
 
     <div class="r-field">
-      <h3>
-        <span type="text"
+      <h3 type="text"
             name="mass"
             id="shipmass"
             contenteditable="true"
             placeholder="mass">
-            {{# round }}{{ mass }}{{/ round }}
-        </span>m
-
-        remaining<span type="text"
-          placeholder="mass">
-          {{# format }}{{ remaining }}{{/ format }}
-        </span>
+        {{# round }}{{ mass }}{{/ round }}
       </h3>
+      <h4>
+        Remaining Tonnage:
+        {{# format }}{{ remaining }}{{/ format }}
+      </h4>
+      <h4>
+        Remaining EP:
+        {{# format }}{{ remainingEP }}{{/ format }}
+      </h4>
+      <h4>
+        Agility: {{ agility }}
+      </h4>
+
       <p>Price: MCr {{# format }}{{ price }}{{/ format }}</p>
       <span class="r-error-message"></span>
     </div>
@@ -44,13 +49,9 @@
 
     <div class="r-field">
       <label for="shiparmor">Armor</label>
-      <select name="armor" id="shiparmor">
-        {{# armorRatings }}
-        <option {{# selected }}selected {{/ selected }}value="{{ value }}">
-          {{ value }}
-        </option>
-        {{/ armorRatings }}
-      </select>
+      <span name="thrust" data-thrust>{{ armor }}</span>
+      <button data-up="armor">&#8593;</button>
+      <button data-down="armor">&#8595;</button>
       <span class="r-error-message"></span>
     </div>
 
@@ -78,20 +79,32 @@
       <span class="r-error-message"></span>
     </div>
 
-    <!-- <div class="r-field">
-      <label for="primaryWeapon">Spinal Mounted Primary Weapon</label>
-      <select id="primaryWeapon">
-        <option value="">...</option>
+    {{# isCapitalShip }}
+      <div class="r-field">
+        Spinal Mounted Primary Weapon:
         {{# primaryWeapons }}
-          <option value="{{ Id }}">{{ Name }}</option>
+          {{ name }} &ndash; {{ count }}
+          <button data-type="primaryWeapons" data-removeweapon="{{ id }}">
+            Remove
+          </button>
         {{/ primaryWeapons }}
-      </select>
-      <select id="primaryWeaponType">
-        <option value="">...</option>
-        <option value="a">A</option>
-      </select>
-      <span class="r-error-message"></span>
-    </div> -->
+        {{^ primaryWeapons }}
+          <select data-weapon id="primaryWeapon">
+            <option value="">...</option>
+            {{# availablePrimaryWeapons }}
+              <option value="{{ Id }}">{{ Name }}-{{ mass }}</option>
+            {{/ availablePrimaryWeapons }}
+          </select>
+          <!-- <select id="primaryWeaponType">
+            <option value="">...</option>
+            <option value="a">A</option>
+          </select> -->
+          <button data-addweapon="primaryWeapons" id="addPrimaryButton">Add</button>
+          <span class="r-error-message"></span>
+        {{/ primaryWeapons }}
+      </div>
+    {{/ isCapitalShip }}
+
     <div class="r-field">
     {{# batteryWeapons }}
       <div>
@@ -122,9 +135,9 @@
     </select>
     <select data-count id="batteryWeaponCount">
       <option value="">...</option>
-      {{# batteries }}
+      {{# starship.availBat }}
       <option value="{{ . }}">{{ . }}</option>
-      {{/ batteries }}
+      {{/ starship.availBat }}
     </select>
     <button data-addweapon="batteryWeapons" id="addBattterButton">Add</button>
     <span class="r-error-message"></span>
@@ -140,9 +153,9 @@
     </select>
     <select data-count id="pdWeaponCount">
       <option value="">...</option>
-      {{# pdt }}
+      {{# starship.availPDW }}
       <option value="{{ . }}">{{ . }}</option>
-      {{/ pdt }}
+      {{/ starship.availPDW }}
     </select>
     <button data-addweapon="pointDefenseWeapons" id="addPointDefenseButton">Add</button>
     <span class="r-error-message"></span>
@@ -159,4 +172,30 @@
     <button data="">Add</button>
     <span class="r-error-message"></span>
   </div> -->
+
+  <div class="r-field">
+    <label for="troops">Officers</label>
+    <span name="troops" data-thrust>{{ starship.crew.officers }}</span>
+  </div>
+
+  <div class="r-field">
+    <label for="troops">Ratings</label>
+    <span name="troops" data-thrust>{{ starship.crew.ratings }}</span>
+  </div>
+
+  <div class="r-field">
+    <label for="troops">Troops</label>
+    <span name="troops" data-thrust>{{ starship.troops }}</span>
+    <button data-up="troops">&#8593;</button>
+    <button data-down="troops">&#8595;</button>
+    <span class="r-error-message"></span>
+  </div>
+
+  <div class="r-field">
+    <label for="passengers">Passengers</label>
+    <span name="passengers" data-thrust>{{ starship.passengers }}</span>
+    <button data-up="passengers">&#8593;</button>
+    <button data-down="passengers">&#8595;</button>
+    <span class="r-error-message"></span>
+  </div>
 </form>

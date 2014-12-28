@@ -11,7 +11,6 @@ module.exports = flight.component(withHogan, function() {
     'increaseButton': '[data-up]',
     'decreaseButton': '[data-down]',
     'configuration': '[name="configuration"]',
-    'primaryWeapon': '#primaryWeapon',
     'batteries': '#batteryWeapons',
     'addWeapons': '[data-addweapon]',
     'removeWeapons': '[data-removeweapon]',
@@ -38,7 +37,6 @@ module.exports = flight.component(withHogan, function() {
 
   this.clearFocus = function(e) {
     this.attr.focused = undefined;
-    console.log('blur');
   };
 
   this.delegateEvents = function(e) {
@@ -54,7 +52,8 @@ module.exports = flight.component(withHogan, function() {
     var data = {};
     var ship = Dispatcher.getStore('ship').currentShip;
     var attr = e.target.dataset.up;
-    data[attr] = ship[attr] + 1;
+    var value = ship[attr] || 0;
+    data[attr] = value + 1;
 
     this.trigger('updateShip', data);
   };
@@ -64,7 +63,8 @@ module.exports = flight.component(withHogan, function() {
     var data = {};
     var ship = Dispatcher.getStore('ship').currentShip;
     var attr = e.target.dataset.down;
-    data[attr] = ship[attr] - 1;
+    var value = ship[attr] || 0;
+    data[attr] = value - 1 > 0 ? value - 1 : 0;
 
     this.trigger('updateShip', data);
   };
@@ -73,7 +73,7 @@ module.exports = flight.component(withHogan, function() {
     e.preventDefault();
     var parent = e.target.parentNode;
     var id = parent.querySelector('[data-weapon]').value;
-    var count = parent.querySelector('[data-count]').value;
+    var count = parent.querySelector('[data-count]') ? parent.querySelector('[data-count]').value : 1;
 
     this.trigger('addWeapons', {
       id: id,
@@ -93,55 +93,6 @@ module.exports = flight.component(withHogan, function() {
     });
   };
 
-  // move to store, should be dynamic
-  this.batteries = function(starship) {
-    var factor = 1;
-    var array = [];
-    if (starship.mass >= 10000 && starship.mass <= 100000) {
-      factor = 10;
-    } else if (starship.mass > 100000) {
-      factor = 100;
-    }
-
-    var limit = Math.round(starship.hardpoints.batteries / factor);
-
-    for (var i = 0; i < limit; i++) {
-      array.push((i + 1) * factor);
-    }
-    return array;
-  };
-
-  // move to store, should be dynamic
-  this.pdt = function(starship) {
-    var factor = 1;
-    var array = [];
-    if (starship.mass >= 1000 && starship.mass < 10000) {
-      factor = 10;
-    } else if (starship.mass >= 10000 && starship.mass <= 100000) {
-      factor = 100;
-    } else if (starship.mass > 100000) {
-      factor = 1000;
-    }
-
-    var limit = Math.round(starship.hardpoints.pointDefense / factor);
-
-    for (var i = 0; i < limit; i++) {
-      array.push((i + 1) * factor);
-    }
-    return array;
-  };
-
-  this.armor = function(starship) {
-    var ratings = [0,1,2,3,4,5,6,7,8,9,10];
-
-    return ratings.map(function(r) {
-        return {
-          value: r,
-          selected: r == starship.armor ? 'selected' : ''
-        }
-    });
-  };
-
   this.displayShip = function(e) {
     var starship = Dispatcher.getStore('ship').currentShip;
 
@@ -152,7 +103,7 @@ module.exports = flight.component(withHogan, function() {
       smallcraft: bootstrap.smallcraft,
       availableBatteryWeapons: bootstrap.batteryWeapons,
       availablePointDefenseWeapons: bootstrap.pointDefenseWeapons,
-      primaryWeapons: bootstrap.primaryWeapons,
+      availablePrimaryWeapons: bootstrap.primaryWeapons,
       configurations: bootstrap.configurations.map(function(c){
         if (c.name == starship.configuration) {
           c.selected = true;
@@ -160,10 +111,7 @@ module.exports = flight.component(withHogan, function() {
           c.selected = undefined;
         }
         return c;
-      }),
-      pdt: this.pdt(starship),
-      batteries: this.batteries(starship),
-      armorRatings: this.armor(starship)
+      })
     };
 
     this.node.innerHTML = this.render(template, context);

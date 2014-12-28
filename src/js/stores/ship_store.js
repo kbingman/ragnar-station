@@ -33,13 +33,15 @@ module.exports = Flux.createStore({
   },
 
   actions: {
-    'reset': 'resetShips',
-    'find': 'setCurrentShip',
-    'delete': 'removeShip',
-    'update': 'updateShip',
-    'addWeapons': 'addWeapons',
-    'removeWeapons': 'removeWeapons'
+    'ship:reset': 'resetShips',
+    'ship:find': 'setCurrentShip',
+    'ship:update': 'updateShip',
+    'ship:delete': 'removeShip',
+    'ship:addWeapons': 'addWeapons',
+    'ship:removeWeapons': 'removeWeapons'
   },
+
+  errors: [],
 
   resetShips: function(data) {
     this.set('ships', data.starships);
@@ -64,27 +66,25 @@ module.exports = Flux.createStore({
   updateShip: function(data) {
     // var id = data.uuid || data.id;
     // var ship = this.find(id);
-    // var index = this.ships.indexOf(ship);
+    var index = this.ships.indexOf(this.currentShip);
     var ship = clone(this.currentShip);
 
     Object.keys(data).forEach(function(attr) {
       ship[attr] = data[attr];
     });
 
-    var ship = this.calculate(ship);
+    ship = this.calculate(ship);
 
     if (!ship.isValid) {
-      this.emit('rollback');
-      alert('hey')
       return;
     }
-    this.currentShip = ship;
 
-    // if (this.ships[index]) {
-    //   this.ships[index] = this.currentShip;
-    // } else {
-    //   this.ships.push(this.currentShip)
-    // }
+    this.currentShip = ship;
+    if (index < 0) {
+      this.ships.push(this.currentShip);
+    } else {
+      this.ships[index] = this.currentShip ;
+    }
 
     this.emit('change');
   },
@@ -114,25 +114,29 @@ module.exports = Flux.createStore({
       .replace(/-/,0);
   },
 
-  removeWeapons: function(data) {
+  removeWeapons: function(options) {
+    var data = {};
     var ship = this.currentShip;
-    var weapons = ship[data.type];
+    var weapons = clone(ship[options.type]);
     var index = weapons.reduce(function(memo, w, i) {
-      if (w.id == data.id) {
+      if (w.id == options.id) {
         memo = i;
       }
       return memo;
-    }, undefined);
+    }, -1);
 
-    if (index != undefined){
+    if (index > -1){
       weapons.splice(index, 1);
-      this.emit('change');
+      data[options.type] = weapons;
+      this.updateShip(data);
     }
   },
 
   addWeapons: function(options) {
     var ship = this.currentShip;
+    var data = {};
     var count = parseInt(options.count || 0);
+    var weapons = ship[options.type] ? clone(ship[options.type]) : [];
     var weapon = bootstrap[options.type].reduce(function(memo, w) {
       if (w.Id == options.id) {
         memo = w;
@@ -140,20 +144,33 @@ module.exports = Flux.createStore({
       return memo;
     }, undefined);
 
-    if (!weapon) {
+    if (!weapon || count == 0) {
       return;
     }
-
-    ship[options.type] = ship[options.type] || [];
-    ship[options.type].push({
+    var newWeapon = {
       id: parseInt(weapon.Id),
       name: weapon.Name,
       count: count,
+      mass: parseFloat(weapon.mass) * count,
       cost: parseFloat(weapon.cost) * count,
       ep: parseFloat(weapon.ep) * count
-    });
-    this.currentShip = this.calculate(this.currentShip);
-    this.emit('change');
+    };
+    var index = weapons.reduce(function(memo, w, i) {
+      if (w.id == newWeapon.id) {
+        newWeapon.count += w.count;
+        memo = i;
+      }
+      return memo;
+    }, -1);
+
+    if (index < 0) {
+      weapons.push(newWeapon);
+    } else {
+      weapons[index] = newWeapon;
+    }
+
+    data[options.type] = weapons;
+    this.updateShip(data);
   },
 
   calculate: function(ship) {
@@ -162,20 +179,23 @@ module.exports = Flux.createStore({
     ship.uuid = ship.uuid || this.generateUID();
     ship.armor = ship.armor ? parseInt(ship.armor) : 0;
 
+    ship.hardpoints = __calculateAvailableHardpoints(ship);
+    ship.availBat = __calculateAvailableWeapons(ship, 'batteryWeapons');
+    ship.availPDW = __calculateAvailableWeapons(ship, 'pointDefenseWeapons');
+
     // Strip commas
     ship.mass = ship.mass ? ship.mass.toString().replace(/,/g,'') : 0;
 
     // Cast attributes into correct type
     ship.mass = isNaN(parseInt(ship.mass)) ? 0 : parseInt(ship.mass);
     ship.isSmallCraft = ship.mass < 100;
+    ship.isCapitalShip = ship.mass >= 10000;
 
     ship.thrust = __setBoundary(ship.thrust);
     ship.ftl = __setBoundary(ship.ftl);
     ship.reactor = __setReactor(ship);
     ship.ep = Math.ceil((ship.reactor) * .005 * ship.mass);
     ship.power = __calculatePowerConsumption(ship);
-
-    ship.hardpoints = __calculateAvailableHardpoints(ship);
 
     ship.tonnage = __calculateTonnage(ship);
     ship.crew = __calculateCrew(ship);
@@ -187,41 +207,40 @@ module.exports = Flux.createStore({
     ship.total = __calculateTotal(ship.tonnage);
     ship.price = __calculateTotal(ship.prices);
     ship.remaining = ship.mass - ship.total;
-
-    ship.isValid = __checkValidity(ship);
+    ship.remainingEP = ship.ep - ship.power.weapons; //temp
+    ship.agility = Math.floor(ship.remainingEP / (0.01 * ship.mass));
+    ship.isValid = this.checkValidity(ship);
 
     return ship;
   },
+
+  checkValidity: function(ship) {
+    var valid = true;
+
+    // Components fit
+    if (ship.remaining < 0) {
+      this.errors.push({
+        message: 'Not enough room left within the hull'
+      })
+      valid = false;
+    }
+
+    // Power requirements are met
+    if (ship.remainingEP < 0) {
+      this.errors.push({
+        message: 'Not enough power, try increasing the reactor'
+      })
+      valid = false;
+    }
+
+    return valid;
+  }
 
 });
 
 function __calculatePrice(ship) {
   var price = 0;
   return price;
-}
-
-function __checkValidity(ship) {
-  var valid = true;
-
-  // Components fit
-  if (ship.remaining < 0) {
-    return false;
-  }
-
-  // Power requirements are met
-  if (ship.ep - ship.power < 0) {
-    return false;
-  }
-
-  return valid;
-}
-
-function __calculateAvailableHardpoints(ship) {
-  // TODO: subtract primary weapon mass
-  return {
-    pointDefense: Math.floor(ship.mass / 100),
-    batteries: Math.round(ship.mass / 1000)
-  };
 }
 
 function __calculateCrew(ship) {
@@ -258,12 +277,81 @@ function __calculateCrew(ship) {
   crew.officers += Math.floor(crew.service / 5);
 
   // Weapons
+  crew.weapons = 0;
+  if (ship.primaryWeapons) {
+    crew.weapons += ship.primaryWeapons.reduce(function(memo, w) {
+      return memo += w.mass / 100;
+    }, 0);
+  }
+  if (ship.batteryWeapons) {
+    crew.weapons += ship.batteryWeapons.reduce(function(memo, w) {
+      return memo += w.count * 2;
+    }, 0);
+  }
+  if (ship.pointDefenseWeapons) {
+    crew.weapons += ship.pointDefenseWeapons.reduce(function(memo, w) {
+      return memo += w.count / 100;
+    }, 1);
+  }
+  crew.ratings += Math.ceil(crew.weapons);
+  crew.officers += Math.floor(crew.weapons / 5);
+
 
   // Troops
 
   // Flight crews
 
   return crew;
+}
+
+function __calculateAvailableHardpoints(ship) {
+  if (!ship.tonnage) {
+    return {
+      pointDefenseWeapons: 0,
+      batteryWeapons: 0
+    };
+  }
+  var batteries = ship.tonnage.batteries ? ship.tonnage.batteries : 0;
+  var pointDefense = ship.tonnage.pointDefense ? ship.tonnage.pointDefense : 0;
+  var primary = ship.tonnage.primary ? ship.tonnage.primary : 0;
+
+  var mass = ship.mass - batteries - pointDefense - primary;
+  var pointDefenseWeapons = Math.floor(mass / 100);
+  var batteryWeapons = Math.round(mass / 1000);
+
+  return {
+    pointDefenseWeapons: pointDefenseWeapons,
+    batteryWeapons: batteryWeapons
+  };
+}
+
+function __calculateAvailableWeapons(ship, type) {
+  if (!ship) {
+    return
+  }
+  var factor = 1;
+  var weapons = ship[type] || [];
+  var count = weapons.reduce(function(memo, t) {
+    memo += t.count;
+    return memo;
+  }, 0);
+  var x = type == 'batteryWeapons' ? 1 : 10;
+  var array = [];
+
+  if (ship.mass >= 1000 && ship.mass < 10000) {
+    factor = 1 * x;
+  } else if (ship.mass >= 10000 && ship.mass <= 100000) {
+    factor = 10 * x;
+  } else if (ship.mass > 100000) {
+    factor = 100 * x;
+  }
+
+  var limit = Math.round((ship.hardpoints[type] - count) / factor);
+
+  for (var i = 0; i < limit; i++) {
+    array.push((i + 1) * factor);
+  }
+  return array;
 }
 
 function __calculatePowerConsumption(ship) {
@@ -275,6 +363,11 @@ function __calculatePowerConsumption(ship) {
   }
   if (ship.pointDefenseWeapons) {
     ship.pointDefenseWeapons.forEach(function(w) {
+      weapons += w.ep;
+    });
+  }
+  if (ship.primaryWeapons) {
+    ship.primaryWeapons.forEach(function(w) {
       weapons += w.ep;
     });
   }
@@ -306,12 +399,16 @@ function __calculatePrice(ship) {
       return memo += w.cost;
     }, 0);
   }
+  if (ship.primaryWeapons) {
+    price.batteries = ship.primaryWeapons.reduce(function(memo, w) {
+      return memo += w.cost;
+    }, 0);
+  }
   if (ship.pointDefenseWeapons && ship.pointDefenseWeapons.length) {
     price.pointDefense = ship.pointDefenseWeapons.reduce(function(memo, w) {
       return memo += w.cost;
     }, 0);
   }
-
 
   return price;
 }
@@ -330,12 +427,19 @@ function __calculateTonnage(ship) {
 
   if (ship.batteryWeapons) {
     tonnage.batteries = ship.batteryWeapons.reduce(function(memo, w) {
-      return memo += w.count * 100;
+      return memo += w.mass;
     }, 0);
   }
+
+  if (ship.primaryWeapons) {
+    tonnage.primary = ship.primaryWeapons.reduce(function(memo, w) {
+      return memo += w.mass;
+    }, 0);
+  }
+
   if (ship.pointDefenseWeapons) {
     tonnage.pointDefense = ship.pointDefenseWeapons.reduce(function(memo, w) {
-      return memo += w.count * 1;
+      return memo += w.mass;
     }, 0);
   }
 
@@ -353,12 +457,13 @@ function __calculateTotal(parts) {
 function __calculateQuarters(ship) {
   var tonnage = 0;
   if (ship.mass < 100) {
-    return 0;
+    tonnage += ship.passengers * 2;
+    return tonnage;
   }
   tonnage += ship.crew.officers * 4;
   tonnage += ship.crew.ratings * 2;
-  // tonnage += ship.troops * 2;
-  // tonnage += ship.passengers * 4;
+  tonnage += ship.troops * 2;
+  tonnage += ship.passengers * 4;
   return tonnage;
 }
 
@@ -372,6 +477,9 @@ function __setReactor(ship) {
 
 function __setBridge(ship) {
   var bridge;
+  if (ship.mass == 0) {
+    return 0;
+  }
   if (ship.mass < 100) {
     return 4;
   }
@@ -389,6 +497,7 @@ function __setBoundary(attr, limit) {
   return attr;
 }
 
+// Needs to be more accessible
 function clone(obj) {
   if(obj == null || typeof(obj) != 'object') {
     return obj;

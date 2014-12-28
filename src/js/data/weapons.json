@@ -1,38 +1,20 @@
 {
   "primaryWeapons": [
-    {
-      "id": "1",
-      "name": "Railgun",
-      "cost": 100,
-      "ep": 2
-    },{
-      "id": "1",
-      "name": "Railgun",
-      "cost": 100,
-      "ep": 2
-    },{
-      "id": "1",
-      "name": "Railgun",
-      "cost": 100,
-      "ep": 2
-    }
+    { "id": 1, "name": "Railgun", "cost": 1000, "ep": 2000, "size": 1000 },
+    { "id": 1, "name": "Mass Driver", "cost": 1000, "ep": 2000, "size": 1000 },
+    { "id": 1, "name": "Ion Cannon", "cost": 1000, "ep": 2000, "size": 1000 }
   ],
   "batteriesWeapons": [
-    {
-      "id": "1",
-      "name": "Railgun",
-      "cost": 100,
-      "ep": 2
-    },{
-      "id": "1",
-      "name": "Railgun",
-      "cost": 100,
-      "ep": 2
-    },{
-      "id": "1",
-      "name": "Railgun",
-      "cost": 100,
-      "ep": 2
-    }
+    { "id": 1, "name": "Missile Tubes", "cost": 30, "ep": 2 },
+    { "id": 2, "name": "Brilliant Pebble Launcher", "cost": 0.75, "ep": 0 },,
+    { "id": 3, "name": "Railgun", "cost": 40, "ep": 40 },
+    { "id": 4, "name": "Coilgun", "cost": 40, "ep": 50 }
+  ],
+  "pointDefenseWeapons": [
+    { "id": 1, "name": "Missle", "cost": 0.75, "ep": 0 },
+    { "id": 2, "name": "Projectile", "cost": 0.75, "ep": 0 },
+    { "id": 3, "name": "Pulse Laser", "cost": 0.75, "ep": 1 },
+    { "id": 4, "name": "Railgun", "cost": 0.75, "ep": 2 },
+    { "id": 5, "name": "Coilgun", "cost": 0.75, "ep": 3 }
   ]
 }

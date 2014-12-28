@@ -24,6 +24,7 @@ type Weapon struct {
   Name string `json:"name"`
   Cost float32 `json:"cost"`
   Ep float32 `json:"ep"`
+  Mass float32 `json:"mass"`
   // RequiredTechLevel int
 }
 
@@ -33,6 +34,7 @@ type Battery struct {
   Count int `json:"count"`
   Cost float32  `json:"cost"`
   Ep float32 `json:"ep"`
+  Mass float32 `json:"mass"`
   // EnergyPoints int `json:"energyPoints"`
 }
 
@@ -55,7 +57,9 @@ type Starship struct {
   Reactor int64 `json:"reactor"`
   Price float32 `json:"price"`
   Ftl int64 `json:"ftl"`
-  PrimaryWeapon Weapon `json:"primaryWeapon"`
+  Passengers int64 `json:"passengers"`
+  Troops int64 `json:"troops"`
+  PrimaryWeapons []Battery `json:"primaryWeapons"`
   PointDefenseWeapons []Battery `json:"pointDefenseWeapons"`
   BatteryWeapons []Battery `json:"batteryWeapons"`
   SmallCraft []Starship `json:"smallCraft"`
@@ -174,6 +178,7 @@ func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Para
     // Make a mustache friendly map for each starship
     starshipMap = map[string]interface{}{
       "id": result.Id.Hex(),
+      "armor": result.Armor,
       "uuid": result.Uuid,
       "name": result.Name,
       "configuration": result.Configuration,
@@ -183,7 +188,7 @@ func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Para
       "ftl": result.Ftl,
       "pointDefenseWeapons": result.PointDefenseWeapons,
       "batteryWeapons": result.BatteryWeapons,
-      "primaryWeapon": result.PrimaryWeapon,
+      "primaryWeapons": result.PrimaryWeapons,
     }
     if result.Id.Hex() == id {
       starship = starshipMap
@@ -204,24 +209,32 @@ func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Para
   }
 
   primaryWeapons := []*Weapon{
-    {1, "Railgun", 1, 1},
-    {2, "Mass Driver", 1, 1},
-    {3, "Ion Gun", 1, 1},
+    {1, "Railgun", 1500, 500, 1000},
+    {1, "Railgun", 2500, 500, 2000},
+    {1, "Railgun", 4200, 500, 3000},
+    {1, "Railgun", 5500, 500, 5000},
+    {2, "Mass Driver", 3500, 500, 1200},
+    {2, "Mass Driver", 5500, 500, 2500},
+    {2, "Mass Driver", 8000, 1000, 5000},
+    {3, "Ion Gun", 5000, 800, 1500},
+    {3, "Ion Gun", 7000, 1200, 3500},
+    {3, "Ion Gun", 10000, 1500, 8000},
   }
 
   batteryWeapons := []*Weapon{
-    {1, "Missle Tubes", 20, 0},
-    {2, "Brilliant Pebble Launcher", 30, 0},
-    {3, "Railgun", 40, 40},
-    {4, "Coilgun", 50, 50},
+    {1, "Missile Tubes", 20, 0, 100},
+    {2, "Brilliant Pebble Launcher", 30, 0, 100},
+    {3, "Railgun", 40, 40, 100},
+    {4, "Coilgun", 50, 50, 100},
   }
 
   pointDefenseWeapons := []*Weapon{
-    {1, "Missle", 0.75, 0},
-    {2, "Projectile", 0.5, 0},
-    {3, "Pulse Laser", 1.0, 1},
-    {4, "Railgun", 2.0, 2},
-    {5, "Coilgun", 4.0, 3},
+    {1, "Missile", 0.75, 0, 1},
+    {2, "Chaff", 0.5, 0, 1},
+    {3, "Projectile", 0.5, 0, 1},
+    {4, "Pulse Laser", 1.0, 1, 1},
+    {5, "Railgun", 2.0, 2, 1},
+    {6, "Coilgun", 4.0, 3, 1},
   }
 
   context := map[string]interface{}{
@@ -238,6 +251,15 @@ func renderShip(w http.ResponseWriter, req *http.Request, params httprouter.Para
   fmt.Fprint(w, renderHTML("index", context))
 }
 
+func renderSector(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+  context := map[string]interface{}{
+    "title": "Sector Map",
+  }
+
+  w.Header().Set("Content-Type", "text/html")
+  fmt.Fprint(w, renderHTML("canvas", context))
+}
+
 
 func main() {
   router := httprouter.New()
@@ -245,6 +267,7 @@ func main() {
   // HTML Routes
   router.GET("/", renderShip)
   router.GET("/ships/:id", renderShip)
+  router.GET("/sector", renderSector)
 
   // JSON API routes
   router.GET("/api/ships", getAllStarships)

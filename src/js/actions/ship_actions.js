@@ -1,8 +1,7 @@
 var flight = require('../lib/flight');
 
-// Flux
+// Flux Dispatcher
 var Dispatcher = require('../dispatcher');
-var ShipStore = require('../stores/ship_store');
 
 // Mixins
 var withAjax = require('../mixin/with_ajax.js');
@@ -11,57 +10,58 @@ var withShipXHR = require('../mixin/with_ship_xhr.js');
 module.exports = flight.component(withAjax, withShipXHR, function() {
 
   this.newShip = function(e, data) {
-    Dispatcher.find();
-    this.trigger(document, 'showNewShip')
+    Dispatcher.dispatch('ship:find');
+    this.trigger(document, 'showNewShip');
   }
 
   this.removeShip = function(e, data) {
-    this.deleteShip(e, data).then(function() {
-      Dispatcher.delete(data);
-    });
+    this.deleteShip(e, data);
+    Dispatcher.dispatch('ship:delete', data);
     this.trigger(document, 'showNewShip');
   };
 
   this.updateShip = function(e, data) {
-    Dispatcher.dispatch('update', data).then(_saveValidShip.bind(this));
+    Dispatcher.dispatch('ship:update', data).then(_saveValidShip.bind(this));
 
-    function _saveValidShip() {
+    function _saveValidShip(test) {
       var ship = Dispatcher.getStore('ship').currentShip;
       this.save(ship);
     }
   };
 
-  this.save = flight.utils.throttle(function(ship){
+  this.save = flight.utils.throttle(function(ship) {
+    console.log(ship.isValid);
     if (!ship.isValid) {
+      console.log('error')
       return;
     }
     if (ship.id) {
-      this.putShip(null, ship).then(function(r) {
-        Dispatcher.update(data.starship);
+      this.putShip(null, ship).then(function(response) {
+        // console.log(response.starship);
       });
     } else {
-      this.createShip(null, ship).then(function(data) {
-        Dispatcher.update(data.starship);
+      this.createShip(null, ship).then(function(response) {
+        Dispatcher.dispatch('ship:update', response.starship);
       });
     }
   }, 2000);
 
   this.editShip = function(e, data) {
-    Dispatcher.find(data);
+    Dispatcher.dispatch('ship:find', data);
     this.trigger(document, 'displayShip');
   };
 
   this.displayShips = function(e, data) {
-    Dispatcher.reset(data);
+    Dispatcher.dispatch('ship:reset', data);
   };
 
   this.addWeapons = function(e, data) {
-    Dispatcher.addWeapons(data);
+    Dispatcher.dispatch('ship:addWeapons', data);
     this.save(Dispatcher.getStore('ship').currentShip);
   };
 
   this.removeWeapons = function(e, data) {
-    Dispatcher.removeWeapons(data);
+    Dispatcher.dispatch('ship:removeWeapons', data);
     this.save(Dispatcher.getStore('ship').currentShip);
   };
 
@@ -80,7 +80,6 @@ module.exports = flight.component(withAjax, withShipXHR, function() {
     this.on(document, 'newShip', this.newShip);
     this.on(document, 'addWeapons', this.addWeapons);
     this.on(document, 'removeWeapons', this.removeWeapons);
-
   });
 
 });
