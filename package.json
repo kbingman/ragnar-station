@@ -15,6 +15,7 @@
   "bugs": {
     "url": "https://github.com/kbingman/ragnar-station/issues"
   },
+  "test": "karma",
   "homepage": "https://github.com/kbingman/ragnar-station",
   "devDependencies": {
     "browserify": "^6.2.0",

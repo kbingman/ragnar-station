@@ -19,10 +19,7 @@ module.exports = function(config) {
     ],
 
     // list of files to exclude
-    exclude: [
-
-    ],
-
+    exclude: [],
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
@@ -52,15 +49,6 @@ module.exports = function(config) {
       }
     },
 
-
-    // Start these browsers, currently available:
-    // - Chrome
-    // - ChromeCanary
-    // - Firefox
-    // - Opera
-    // - Safari (only Mac)
-    // - PhantomJS
-    // - IE (only Windows)
     browsers: ['Chrome'],
 
     browserify: {
@@ -77,9 +65,6 @@ module.exports = function(config) {
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
 
-
-    // Continuous Integration mode
-    // if true, it capture browsers, run tests and exit
     singleRun: false
   });
 };

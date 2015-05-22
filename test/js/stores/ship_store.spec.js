@@ -5,16 +5,17 @@ var ship = mocks.starships[0]
 describe('stores/ship_stores', function(){
 
   beforeEach(function() {
-    Dispatcher.reset(mocks);
-    Dispatcher.find(ship);
+    Dispatcher.dispatch('reset', mocks);
+    Dispatcher.dispatch('find', ship);
     // Dispatcher.find(mocks[0]);
-    console.log(ship);
+    // console.log(ship);
   });
 
   describe('Initial State', function() {
 
     it('should set the current ship on bootstrap', function() {
       var currentShip = Dispatcher.getStore('ship').currentShip;
+      debugger
       expect(currentShip.name).to.equal(ship.name);
     });
 
@@ -43,7 +44,7 @@ describe('stores/ship_stores', function(){
   describe('Ship Store functions', function() {
 
     it('should add a ship and set it as current', function() {
-      Dispatcher.update({
+      Dispatcher.dispatch('update', {
         id: '545f1f949c46d83e4e00000d',
         name: 'Of Course I Still Love You',
         mass: '100000',
@@ -55,7 +56,7 @@ describe('stores/ship_stores', function(){
     });
 
     it('should add a ship and set a UUID for it', function() {
-      Dispatcher.update({
+      Dispatcher.dispatch('update', {
         id: '545f1f949c46d83e4e00000f',
         name: 'Me, I\'m Counting',
         mass: '100000',
@@ -68,7 +69,7 @@ describe('stores/ship_stores', function(){
     });
 
     it('should remove a ship', function() {
-      Dispatcher.delete({
+      Dispatcher.dispatch('delete', {
         id: '545c53a77c6e192dc6000001'
       });
       var ship = Dispatcher.getStore('ship').find('545c53a77c6e192dc6000001');
@@ -77,7 +78,7 @@ describe('stores/ship_stores', function(){
     });
 
     it('should calculate the bridge size of a new ship', function() {
-      Dispatcher.update({
+      Dispatcher.dispatch('update', {
         id: '545f1f949c46d83e4e00000f',
         name: 'Who\'s Counting?',
         mass: '100000',

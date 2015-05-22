@@ -12,9 +12,9 @@ describe('ui_component/ship_form_ui', function(){
 
     component = (new shipForm()).initialize(element);
     // Add a bunch of mock ships
-    Dispatcher.reset(mocks);
+    Dispatcher.dispatch('reset', mocks);
     // set current ship in the ship store
-    Dispatcher.find(Dispatcher.getStore('ship').ships[0]);
+    Dispatcher.dispatch('find', Dispatcher.getStore('ship').ships[0]);
     // trigger render
     // component.trigger(document, 'displayShip');
   });
